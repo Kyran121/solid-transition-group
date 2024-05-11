@@ -32,6 +32,8 @@
     "@astrojs/solid-js": "^4.1.0",
     "@astrojs/tailwind": "^5.1.0",
     "@release-it/keep-a-changelog": "^5.0.0",
+    "@solidjs/testing-library": "^0.8.7",
+    "@vitest/utils": "^1.5.1",
     "astro": "^4.6.3",
     "concurrently": "^8.2.2",
     "jsdom": "^24.0.0",

@@ -20,12 +20,13 @@ export default defineConfig(({ mode }) => {
       isolate: !testSSR,
       environment: testSSR ? "node" : "jsdom",
       transformMode: { web: [/\.[jt]sx$/] },
+      css: true,
       ...(testSSR
         ? {
             include: ["test/server.test.{ts,tsx}"]
           }
         : {
-            include: ["test/*.test.{ts,tsx}"],
+            include: ["test/**/*.test.{ts,tsx}"],
             exclude: ["test/server.test.{ts,tsx}"]
           })
     },

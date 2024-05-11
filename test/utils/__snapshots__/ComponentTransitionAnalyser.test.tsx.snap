@@ -1,0 +1,77 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ComponentTransitionAnalyser > analyseTransitionActivity > correctly analyses activity for an element which enters 1`] = `
+"Render 1:
+    +  <div
+    +    class="duration-75 opacity-0"
+    +  >
+    +    <span>
+    +      Hello!
+    +    </span>
+    +  </div>
+
+Render 2:
+    -  class="duration-75 opacity-0"
+    +  class="duration-75 opacity-100"
+
+Render 3: Transition took at least 75ms
+    -  class="duration-75 opacity-100"
+    +  class"
+`;
+
+exports[`ComponentTransitionAnalyser > analyseTransitionActivity > correctly analyses activity for an element which leaves 1`] = `
+"Render 1:
+    -  <div>
+    +  <div
+    +    class="duration-75 opacity-100"
+    +  >
+
+Render 2:
+    -  class="duration-75 opacity-100"
+    +  class="duration-75 opacity-0"
+
+Render 3: Transition took at least 75ms
+    -  <div
+    -    class="duration-75 opacity-0"
+    -  >
+    -    <span>
+    -      Hello!
+    -    </span>
+    -  </div>"
+`;
+
+exports[`ComponentTransitionAnalyser > analyseTransitionActivity > correctly analyses activity for element which enters and leaves 1`] = `
+"Render 1:
+    +  <div
+    +    class="duration-75 opacity-0"
+    +  >
+    +    <span>
+    +      Hello!
+    +    </span>
+    +  </div>
+
+Render 2:
+    -  class="duration-75 opacity-0"
+    +  class="duration-75 opacity-100"
+
+Render 3: Transition took at least 75ms
+    -  class="duration-75 opacity-100"
+    +  class
+
+Render 4:
+    -  class
+    +  class="duration-100 opacity-100"
+
+Render 5:
+    -  class="duration-100 opacity-100"
+    +  class="duration-100 opacity-0"
+
+Render 6: Transition took at least 100ms
+    -  <div
+    -    class="duration-100 opacity-0"
+    -  >
+    -    <span>
+    -      Hello!
+    -    </span>
+    -  </div>"
+`;

@@ -1,0 +1,133 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Transition > Events > should fire events for all the stages 1`] = `
+"Render 1:
+    +  <div
+    +    class="duration-75 opacity-0"
+    +  >
+    +    <span>
+    +      Hello!
+    +    </span>
+    +  </div>
+
+Render 2:
+    -  class="duration-75 opacity-0"
+    +  class="duration-75 opacity-100"
+
+Render 3: Transition took at least 75ms
+    -  class="duration-75 opacity-100"
+    +  class
+
+Render 4:
+    -  class
+    +  class="duration-100 opacity-100"
+
+Render 5:
+    -  class="duration-100 opacity-100"
+    +  class="duration-100 opacity-0"
+
+Render 6: Transition took at least 100ms
+    -  <div
+    -    class="duration-100 opacity-0"
+    -  >
+    -    <span>
+    -      Hello!
+    -    </span>
+    -  </div>"
+`;
+
+exports[`Transition > Setup > 'base' and 'from' classes applied immediately to transition element when show=true and appear=true 1`] = `
+"<div
+  class="duration-75 opacity-0"
+>
+  <span>
+    Hello!
+  </span>
+</div>"
+`;
+
+exports[`Transition > Setup > transition element immediately hidden when show=false 1`] = `""`;
+
+exports[`Transition > Setup > transition element immediately shown when show=true 1`] = `
+"<div>
+  <span>
+    Hello!
+  </span>
+</div>"
+`;
+
+exports[`Transition > Shallow Transitions > should transition in and out completely 1`] = `
+"Render 1:
+    +  <div
+    +    class="duration-75 opacity-0"
+    +  >
+    +    <span>
+    +      Hello!
+    +    </span>
+    +  </div>
+
+Render 2:
+    -  class="duration-75 opacity-0"
+    +  class="duration-75 opacity-100"
+
+Render 3: Transition took at least 75ms
+    -  class="duration-75 opacity-100"
+    +  class
+
+Render 4:
+    -  class
+    +  class="duration-100 opacity-100"
+
+Render 5:
+    -  class="duration-100 opacity-100"
+    +  class="duration-100 opacity-0"
+
+Render 6: Transition took at least 100ms
+    -  <div
+    -    class="duration-100 opacity-0"
+    -  >
+    -    <span>
+    -      Hello!
+    -    </span>
+    -  </div>"
+`;
+
+exports[`Transition > Shallow Transitions > should transition in completely 1`] = `
+"Render 1:
+    +  <div
+    +    class="duration-75 opacity-0"
+    +  >
+    +    <span>
+    +      Hello!
+    +    </span>
+    +  </div>
+
+Render 2:
+    -  class="duration-75 opacity-0"
+    +  class="duration-75 opacity-100"
+
+Render 3: Transition took at least 75ms
+    -  class="duration-75 opacity-100"
+    +  class"
+`;
+
+exports[`Transition > Shallow Transitions > should transition out completely 1`] = `
+"Render 1:
+    -  <div>
+    +  <div
+    +    class="duration-75 opacity-100"
+    +  >
+
+Render 2:
+    -  class="duration-75 opacity-100"
+    +  class="duration-75 opacity-0"
+
+Render 3: Transition took at least 75ms
+    -  <div
+    -    class="duration-75 opacity-0"
+    -  >
+    -    <span>
+    -      Hello!
+    -    </span>
+    -  </div>"
+`;

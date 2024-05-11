@@ -1,145 +1,204 @@
-// Flush animation frames manually
-const rafQueue: VoidFunction[] = [];
-(globalThis as any).requestAnimationFrame = (cb: VoidFunction) => {
-  rafQueue.push(cb);
-};
-function flushRaf() {
-  const queue = rafQueue.slice();
-  rafQueue.length = 0;
-  queue.forEach(cb => cb());
-}
+import { Show } from "solid-js";
+import { describe, expect, test, it, vi } from "vitest";
+import { Transition, type TransitionEvents } from "../src";
+import { fireEvent, render } from "@solidjs/testing-library";
+import { createSignal, type Component } from "solid-js";
+import { formatHTML } from "./utils/HTMLFormatter";
+import ComponentTransitionAnalyser, {
+  type TransitionComponent
+} from "./utils/ComponentTransitionAnalyser";
+import "./index.css";
 
-import { Show, createRoot, createSignal } from "solid-js";
-import { describe, expect, it } from "vitest";
-import { Transition } from "../src";
-import { exitTransition } from "../src/common";
+const TRANSITION_CONTAINER_ID = "transition-container";
+
+type EventHandler = (...args: any[]) => void;
+
+type TransitionComponentProps = {
+  show?: boolean;
+  appear?: boolean;
+  enterDuration?: number;
+  exitDuration?: number;
+  events?: TransitionEvents;
+};
 
 describe("Transition", () => {
-  it("matches the timing of vue out-in transition", async () => {
-    const captured: [type: string, parentNode: boolean, classname: string][] = [];
-    let runEnter!: VoidFunction;
-    let runExit!: VoidFunction;
-
-    function onBeforeEnter(el: Element) {
-      captured.push(["before enter", el.parentNode !== null, el.className]);
-      requestAnimationFrame(() => {
-        captured.push(["1 frame", el.parentNode !== null, el.className]);
-        requestAnimationFrame(() => {
-          captured.push(["2 frame", el.parentNode !== null, el.className]);
-          requestAnimationFrame(() => {
-            captured.push(["3 frame", el.parentNode !== null, el.className]);
-          });
-        });
-      });
-    }
-    function onEnter(el: Element, done: VoidFunction) {
-      captured.push(["enter", el.parentNode !== null, el.className]);
-      runEnter = done;
-    }
-    function onAfterEnter(el: Element) {
-      captured.push(["after enter", el.parentNode !== null, el.className]);
-    }
-    function onBeforeExit(el: Element) {
-      captured.push(["before exit", el.parentNode !== null, el.className]);
-    }
-    function onExit(el: Element, done: VoidFunction) {
-      captured.push(["exit", el.parentNode !== null, el.className]);
-      runExit = done;
-    }
-    function onAfterExit(el: Element) {
-      captured.push(["after exit", el.parentNode !== null, el.className]);
-    }
-
-    const [page, setPage] = createSignal(1);
-
-    const dispose = createRoot(dispose => {
-      <div>
-        <Transition
-          mode="outin"
-          onBeforeEnter={onBeforeEnter}
-          onEnter={onEnter}
-          onAfterEnter={onAfterEnter}
-          onBeforeExit={onBeforeExit}
-          onExit={onExit}
-          onAfterExit={onAfterExit}
-        >
-          <Show when={page()} keyed>
-            {i => <div>{i}</div>}
-          </Show>
-        </Transition>
-      </div>;
-
-      return dispose;
+  describe("Setup", () => {
+    test("transition element immediately shown when show=true", () => {
+      const { getByTestId } = render(createTransitionComponent({ show: true }) as any);
+      expect(formatHTML(getByTestId(TRANSITION_CONTAINER_ID).innerHTML)).toMatchSnapshot();
     });
 
-    expect(captured).toHaveLength(0);
+    test("transition element immediately hidden when show=false", () => {
+      const { getByTestId } = render(createTransitionComponent({ show: false }) as any);
+      expect(formatHTML(getByTestId(TRANSITION_CONTAINER_ID).innerHTML)).toMatchSnapshot();
+    });
 
-    setPage(2);
-
-    flushRaf();
-    flushRaf();
-
-    runExit();
-
-    // enter - await microtask
-    await Promise.resolve();
-
-    flushRaf();
-    flushRaf();
-    flushRaf();
-
-    runEnter();
-
-    expect(captured).toEqual([
-      ["before exit", true, ""],
-      ["exit", true, "s-exit s-exit-active"],
-      ["before enter", false, ""],
-      ["after exit", false, ""],
-      ["enter", true, "s-enter s-enter-active"],
-      ["1 frame", true, "s-enter s-enter-active"],
-      ["2 frame", true, "s-enter s-enter-active"],
-      ["3 frame", true, "s-enter-active s-enter-to"],
-      ["after enter", true, ""]
-    ]);
-
-    dispose();
+    test("'base' and 'from' classes applied immediately to transition element when show=true and appear=true", () => {
+      const { getByTestId } = render(
+        createTransitionComponent({
+          show: true,
+          appear: true
+        }) as any
+      );
+      expect(formatHTML(getByTestId(TRANSITION_CONTAINER_ID).innerHTML)).toMatchSnapshot();
+    });
   });
-});
 
-describe("exitTransition", () => {
-  it("removes exit classes after calling done()", () => {
-    const parent = document.createElement("div");
-    const el = document.createElement("div");
-    parent.appendChild(el);
+  describe("Shallow Transitions", () => {
+    it("should transition in completely", async () => {
+      const enterDuration = 75;
 
-    let capturedClassName: string | null = null;
+      const TransitionComponent = createTransitionComponent({
+        show: false,
+        enterDuration
+      });
 
-    exitTransition(
-      {
-        enterActive: ["s-enter-active"],
-        enterTo: ["s-enter-to"],
-        enter: ["s-enter"],
-        exitActive: ["s-exit-active"],
-        exitTo: ["s-exit-to"],
-        exit: ["s-exit"],
-        move: ["s-move"]
-      },
-      {},
-      el,
-      () => (capturedClassName = el.className)
-    );
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(addToggleButtonTrigger(enterDuration));
 
-    expect(el.className).toBe("s-exit s-exit-active");
-    expect(capturedClassName).toBe(null);
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
 
-    flushRaf();
-    flushRaf();
+    it("should transition out completely", async () => {
+      const exitDuration = 75;
 
-    expect(el.className).toBe("s-exit-active s-exit-to");
-    expect(capturedClassName).toBe(null);
+      const TransitionComponent = createTransitionComponent({
+        show: true,
+        exitDuration
+      });
 
-    el.dispatchEvent(new Event("transitionend"));
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(addToggleButtonTrigger(exitDuration));
 
-    expect(capturedClassName).toBe("s-exit-active s-exit-to");
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
+
+    it("should transition in and out completely", async () => {
+      const enterDuration = 75;
+      const exitDuration = 100;
+
+      const TransitionComponent = createTransitionComponent({
+        show: false,
+        enterDuration,
+        exitDuration
+      });
+
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(addToggleButtonTrigger(enterDuration));
+      componentTransitionAnalyser.addTransitionTrigger(addToggleButtonTrigger(exitDuration));
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
   });
+
+  describe("Events", () => {
+    it("should fire events for all the stages", async () => {
+      const eventHandler = vi.fn();
+      const callEventHandler = (type: keyof TransitionEvents) => () =>
+        eventHandler(type, Date.now());
+
+      const enterDuration = 75;
+      const exitDuration = 100;
+
+      const TransitionComponent = createTransitionComponent({
+        show: false,
+        enterDuration,
+        exitDuration,
+        events: {
+          onBeforeEnter: callEventHandler("onBeforeEnter"),
+          onEnter: callEventHandler("onEnter"),
+          onAfterEnter: callEventHandler("onAfterEnter"),
+          onBeforeExit: callEventHandler("onBeforeExit"),
+          onExit: callEventHandler("onExit"),
+          onAfterExit: callEventHandler("onAfterExit")
+        }
+      });
+
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(addToggleButtonTrigger(enterDuration));
+      componentTransitionAnalyser.addTransitionTrigger(addToggleButtonTrigger(exitDuration));
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+
+      expect(eventHandler).toHaveBeenCalledTimes(6);
+      expect(eventHandler.mock.calls.map(([name]) => name)).toEqual([
+        // Order is important here
+        "onBeforeEnter",
+        "onEnter",
+        "onAfterEnter",
+        "onBeforeExit",
+        "onExit",
+        "onAfterExit"
+      ]);
+
+      const enterHookDiff = eventHandler.mock.calls[2][1] - eventHandler.mock.calls[0][1];
+      expect(enterHookDiff).toBeGreaterThanOrEqual(enterDuration);
+      expect(enterHookDiff).toBeLessThanOrEqual(enterDuration * 3);
+
+      const exitHookDiff = eventHandler.mock.calls[5][1] - eventHandler.mock.calls[3][1];
+      expect(exitHookDiff).toBeGreaterThanOrEqual(exitDuration);
+      expect(exitHookDiff).toBeLessThanOrEqual(exitDuration * 3);
+    });
+  });
+  
+  const noopEventHandler = () => {};
+
+  const createEventHandler =
+    (events: TransitionEvents) =>
+    (type: keyof TransitionEvents) =>
+    (...args: any[]) =>
+      ((events[type] as EventHandler) ?? noopEventHandler)(...args);
+
+  function createTransitionComponent({
+    enterDuration = 75,
+    exitDuration = 100,
+    show: shown = true,
+    appear = false,
+    events = {}
+  }: TransitionComponentProps): Component {
+    return () => {
+      const [show, setShow] = createSignal(shown);
+      const handleEvent = createEventHandler(events);
+
+      return (
+        <>
+          <div data-testid="transition-container">
+            <Transition
+              onBeforeEnter={handleEvent("onBeforeEnter")}
+              onEnter={handleEvent("onEnter")}
+              onAfterEnter={handleEvent("onAfterEnter")}
+              onBeforeExit={handleEvent("onBeforeExit")}
+              onExit={handleEvent("onExit")}
+              onAfterExit={handleEvent("onAfterExit")}
+              enterActiveClass={`duration-${enterDuration}`}
+              enterClass="opacity-0"
+              enterToClass="opacity-100"
+              exitActiveClass={`duration-${exitDuration}`}
+              exitClass="opacity-100"
+              exitToClass="opacity-0"
+              appear={appear}
+            >
+              <Show when={show()}>
+                <div>
+                  <span>Hello!</span>
+                </div>
+              </Show>
+            </Transition>
+          </div>
+          <button data-testid="toggle" onClick={() => setShow(!show())}>
+            Toggle
+          </button>
+        </>
+      );
+    };
+  }
+
+  function addToggleButtonTrigger(expectedDuration: number) {
+    const execute = (tools: TransitionComponent) => fireEvent.click(tools.getByTestId("toggle"));
+    return { execute, expectedDuration };
+  }
 });

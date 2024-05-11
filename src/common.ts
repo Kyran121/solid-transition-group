@@ -38,8 +38,8 @@ export function enterTransition(
   // before the elements are added to the DOM
   onBeforeEnter?.(el);
 
-  el.classList.add(...classes.enter);
   el.classList.add(...classes.enterActive);
+  el.classList.add(...classes.enter);
 
   // after the microtask the elements will be added to the DOM
   // and onEnter will be called in the same frame
@@ -90,8 +90,8 @@ export function exitTransition(
 
   onBeforeExit?.(el);
 
-  el.classList.add(...classes.exit);
   el.classList.add(...classes.exitActive);
+  el.classList.add(...classes.exit);
 
   onExit?.(el, () => endTransition());
 
