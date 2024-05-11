@@ -33,7 +33,9 @@ export default defineConfig(({ mode }) => {
         : {
             include: ["test/**/*.test.{ts,tsx}"],
             exclude: ["test/server.test.{ts,tsx}"]
-          })
+          }),
+      // optimisation
+      maxConcurrency: 10,
     },
     resolve: {
       conditions: testSSR ? ["node"] : ["browser", "development"]

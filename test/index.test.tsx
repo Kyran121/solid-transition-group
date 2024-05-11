@@ -55,8 +55,8 @@ suite("Transition", () => {
     });
   });
 
-  describe("Shallow Transitions", () => {
-    it("should transition in completely", async () => {
+  describe.concurrent("Shallow Transitions", () => {
+    it("should transition in completely", async ({ expect }) => {
       const enterDuration = 75;
 
       const TransitionComponent = createTransitionComponent({
@@ -71,7 +71,7 @@ suite("Transition", () => {
       expect(activityReport).toMatchSnapshot();
     });
 
-    it("should transition in completely (generated classes)", async () => {
+    it("should transition in completely (generated classes)", async ({ expect }) => {
       const enterDuration = 75;
 
       const TransitionComponent = createTransitionComponent({
@@ -86,7 +86,7 @@ suite("Transition", () => {
       expect(activityReport).toMatchSnapshot();
     });
 
-    it("should transition out completely", async () => {
+    it("should transition out completely", async ({ expect }) => {
       const exitDuration = 75;
 
       const TransitionComponent = createTransitionComponent({
@@ -101,7 +101,7 @@ suite("Transition", () => {
       expect(activityReport).toMatchSnapshot();
     });
 
-    it("should transition out completely (generated classes)", async () => {
+    it("should transition out completely (generated classes)", async ({ expect }) => {
       const exitDuration = 75;
 
       const TransitionComponent = createTransitionComponent({
@@ -116,7 +116,7 @@ suite("Transition", () => {
       expect(activityReport).toMatchSnapshot();
     });
 
-    it("should transition in and out completely", async () => {
+    it("should transition in and out completely", async ({ expect }) => {
       const enterDuration = 75;
       const exitDuration = 100;
 
@@ -134,7 +134,7 @@ suite("Transition", () => {
       expect(activityReport).toMatchSnapshot();
     });
 
-    it("should transition in and out completely (generated classes)", async () => {
+    it("should transition in and out completely (generated classes)", async ({ expect }) => {
       const enterDuration = 75;
       const exitDuration = 100;
 
@@ -152,8 +152,8 @@ suite("Transition", () => {
     });
   });
 
-  describe("Events", () => {
-    it("should fire events for all the stages", async () => {
+  describe.concurrent("Events", () => {
+    it("should fire events for all the stages", async ({ expect }) => {
       const eventHandler = vi.fn();
       const callEventHandler = (type: keyof TransitionEvents) => () =>
         eventHandler(type, Date.now());

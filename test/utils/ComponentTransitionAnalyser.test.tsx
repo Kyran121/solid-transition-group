@@ -14,8 +14,10 @@ type TransitionComponentProps = {
 };
 
 suite("ComponentTransitionAnalyser", () => {
-  describe("analyseTransitionActivity", () => {
-    it("throws error when transitioning element is missing duration (entering transition)", async () => {
+  describe.concurrent("analyseTransitionActivity", () => {
+    it("throws error when transitioning element is missing duration (entering transition)", async ({
+      expect
+    }) => {
       const TransitionComponent = createTransitionComponent({
         show: false,
         enterDuration: 9999
@@ -29,7 +31,9 @@ suite("ComponentTransitionAnalyser", () => {
       );
     });
 
-    it("throws error when transition fails to take specified amount of time", async () => {
+    it("throws error when transition fails to take specified amount of time", async ({
+      expect
+    }) => {
       const enterDuration = 150;
 
       const TransitionComponent = createTransitionComponent({
@@ -45,7 +49,7 @@ suite("ComponentTransitionAnalyser", () => {
       );
     });
 
-    it("correctly analyses activity for an element which enters", async () => {
+    it("correctly analyses activity for an element which enters", async ({ expect }) => {
       const enterDuration = 75;
 
       const TransitionComponent = createTransitionComponent({
@@ -60,7 +64,7 @@ suite("ComponentTransitionAnalyser", () => {
       expect(activityReport).toMatchSnapshot();
     });
 
-    it("correctly analyses activity for an element which leaves", async () => {
+    it("correctly analyses activity for an element which leaves", async ({ expect }) => {
       const exitDuration = 75;
 
       const TransitionComponent = createTransitionComponent({
@@ -75,7 +79,7 @@ suite("ComponentTransitionAnalyser", () => {
       expect(activityReport).toMatchSnapshot();
     });
 
-    it("correctly analyses activity for element which enters and leaves", async () => {
+    it("correctly analyses activity for element which enters and leaves", async ({ expect }) => {
       const enterDuration = 75;
       const exitDuration = 100;
 
