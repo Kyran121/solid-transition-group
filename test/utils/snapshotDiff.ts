@@ -1,10 +1,17 @@
 import { diff } from "@vitest/utils/diff";
+import { DiffOptions } from "vitest";
 
-const DIFF_OPTIONS = {
+// copied from @vitest/utils/diff internals since it was not exposed
+const noColor = (string: string): string => string
+
+const DIFF_OPTIONS: DiffOptions = {
   aAnnotation: "__REMOVE_ME__",
   bAnnotation: "__REMOVE_ME__",
   contextLines: 0,
-  expand: false
+  expand: false,
+  patchColor: noColor,
+  aColor: noColor,
+  bColor: noColor
 };
 
 export function snapshotDiff(previous: string, current: string): string {
