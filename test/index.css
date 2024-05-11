@@ -1,12 +1,12 @@
-.duration-75 {
+.duration-75, .transitionElement-enter-active {
   transition-duration: 75ms;
 }
-.duration-100 {
+.duration-100, .transitionElement-exit-active {
   transition-duration: 100ms;
 }
-.opacity-0 {
+.opacity-0, .transitionElement-enter, .transitionElement-exit-to {
   opacity: 0;
 }
-.opacity-100 {
+.opacity-100, .transitionElement-exit, .transitionElement-enter-to {
   opacity: 100;
 }

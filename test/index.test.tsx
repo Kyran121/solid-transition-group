@@ -1,6 +1,6 @@
 import { Show } from "solid-js";
-import { describe, expect, test, it, vi } from "vitest";
-import { Transition, type TransitionEvents } from "../src";
+import { suite, describe, expect, test, it, vi } from "vitest";
+import { Transition, TransitionProps, type TransitionEvents } from "../src";
 import { fireEvent, render } from "@solidjs/testing-library";
 import { createSignal, type Component } from "solid-js";
 import { formatHTML } from "./utils/HTMLFormatter";
@@ -13,15 +13,25 @@ const TRANSITION_CONTAINER_ID = "transition-container";
 
 type EventHandler = (...args: any[]) => void;
 
-type TransitionComponentProps = {
-  show?: boolean;
+type TestTransitionProps = TransitionEvents & {
+  show: boolean;
   appear?: boolean;
+  name?: string;
   enterDuration?: number;
   exitDuration?: number;
-  events?: TransitionEvents;
 };
 
-describe("Transition", () => {
+type TestTransitionClasses = Pick<
+  TransitionProps,
+  | "enterActiveClass"
+  | "enterClass"
+  | "enterToClass"
+  | "exitActiveClass"
+  | "exitClass"
+  | "exitToClass"
+>;
+
+suite("Transition", () => {
   describe("Setup", () => {
     test("transition element immediately shown when show=true", () => {
       const { getByTestId } = render(createTransitionComponent({ show: true }) as any);
@@ -37,7 +47,8 @@ describe("Transition", () => {
       const { getByTestId } = render(
         createTransitionComponent({
           show: true,
-          appear: true
+          appear: true,
+          enterDuration: 75
         }) as any
       );
       expect(formatHTML(getByTestId(TRANSITION_CONTAINER_ID).innerHTML)).toMatchSnapshot();
@@ -60,12 +71,42 @@ describe("Transition", () => {
       expect(activityReport).toMatchSnapshot();
     });
 
+    it("should transition in completely (generated classes)", async () => {
+      const enterDuration = 75;
+
+      const TransitionComponent = createTransitionComponent({
+        show: false,
+        name: "transitionElement"
+      });
+
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(addToggleButtonTrigger(enterDuration));
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
+
     it("should transition out completely", async () => {
       const exitDuration = 75;
 
       const TransitionComponent = createTransitionComponent({
         show: true,
         exitDuration
+      });
+
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(addToggleButtonTrigger(exitDuration));
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
+
+    it("should transition out completely (generated classes)", async () => {
+      const exitDuration = 75;
+
+      const TransitionComponent = createTransitionComponent({
+        show: true,
+        name: "transitionElement"
       });
 
       const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
@@ -92,6 +133,23 @@ describe("Transition", () => {
       const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
       expect(activityReport).toMatchSnapshot();
     });
+
+    it("should transition in and out completely (generated classes)", async () => {
+      const enterDuration = 75;
+      const exitDuration = 100;
+
+      const TransitionComponent = createTransitionComponent({
+        show: false,
+        name: "transitionElement"
+      });
+
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(addToggleButtonTrigger(enterDuration));
+      componentTransitionAnalyser.addTransitionTrigger(addToggleButtonTrigger(exitDuration));
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
   });
 
   describe("Events", () => {
@@ -107,14 +165,12 @@ describe("Transition", () => {
         show: false,
         enterDuration,
         exitDuration,
-        events: {
-          onBeforeEnter: callEventHandler("onBeforeEnter"),
-          onEnter: callEventHandler("onEnter"),
-          onAfterEnter: callEventHandler("onAfterEnter"),
-          onBeforeExit: callEventHandler("onBeforeExit"),
-          onExit: callEventHandler("onExit"),
-          onAfterExit: callEventHandler("onAfterExit")
-        }
+        onBeforeEnter: callEventHandler("onBeforeEnter"),
+        onEnter: callEventHandler("onEnter"),
+        onAfterEnter: callEventHandler("onAfterEnter"),
+        onBeforeExit: callEventHandler("onBeforeExit"),
+        onExit: callEventHandler("onExit"),
+        onAfterExit: callEventHandler("onAfterExit")
       });
 
       const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
@@ -144,7 +200,7 @@ describe("Transition", () => {
       expect(exitHookDiff).toBeLessThanOrEqual(exitDuration * 3);
     });
   });
-  
+
   const noopEventHandler = () => {};
 
   const createEventHandler =
@@ -153,16 +209,11 @@ describe("Transition", () => {
     (...args: any[]) =>
       ((events[type] as EventHandler) ?? noopEventHandler)(...args);
 
-  function createTransitionComponent({
-    enterDuration = 75,
-    exitDuration = 100,
-    show: shown = true,
-    appear = false,
-    events = {}
-  }: TransitionComponentProps): Component {
+  function createTransitionComponent(props: TestTransitionProps): Component {
     return () => {
-      const [show, setShow] = createSignal(shown);
-      const handleEvent = createEventHandler(events);
+      const [show, setShow] = createSignal(props.show);
+      const handleEvent = createEventHandler(props);
+      const classProps = createClassProps(props);
 
       return (
         <>
@@ -174,13 +225,9 @@ describe("Transition", () => {
               onBeforeExit={handleEvent("onBeforeExit")}
               onExit={handleEvent("onExit")}
               onAfterExit={handleEvent("onAfterExit")}
-              enterActiveClass={`duration-${enterDuration}`}
-              enterClass="opacity-0"
-              enterToClass="opacity-100"
-              exitActiveClass={`duration-${exitDuration}`}
-              exitClass="opacity-100"
-              exitToClass="opacity-0"
-              appear={appear}
+              name={props.name}
+              appear={props.appear}
+              {...classProps}
             >
               <Show when={show()}>
                 <div>
@@ -194,6 +241,20 @@ describe("Transition", () => {
           </button>
         </>
       );
+    };
+  }
+
+  function createClassProps(props: TestTransitionProps): TestTransitionClasses {
+    if (props.name) {
+      return {};
+    }
+    return {
+      enterActiveClass: `duration-${props.enterDuration}`,
+      enterClass: "opacity-0",
+      enterToClass: "opacity-100",
+      exitActiveClass: `duration-${props.exitDuration}`,
+      exitClass: "opacity-100",
+      exitToClass: "opacity-0"
     };
   }
 

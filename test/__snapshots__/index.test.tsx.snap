@@ -56,6 +56,42 @@ exports[`Transition > Setup > transition element immediately shown when show=tru
 </div>"
 `;
 
+exports[`Transition > Shallow Transitions > should transition in and out completely (generated classes) 1`] = `
+"Render 1:
+    +  <div
+    +    class="transitionElement-enter-active transitionElement-enter"
+    +  >
+    +    <span>
+    +      Hello!
+    +    </span>
+    +  </div>
+
+Render 2:
+    -  class="transitionElement-enter-active transitionElement-enter"
+    +  class="transitionElement-enter-active transitionElement-enter-to"
+
+Render 3: Transition took at least 75ms
+    -  class="transitionElement-enter-active transitionElement-enter-to"
+    +  class
+
+Render 4:
+    -  class
+    +  class="transitionElement-exit-active transitionElement-exit"
+
+Render 5:
+    -  class="transitionElement-exit-active transitionElement-exit"
+    +  class="transitionElement-exit-active transitionElement-exit-to"
+
+Render 6: Transition took at least 100ms
+    -  <div
+    -    class="transitionElement-exit-active transitionElement-exit-to"
+    -  >
+    -    <span>
+    -      Hello!
+    -    </span>
+    -  </div>"
+`;
+
 exports[`Transition > Shallow Transitions > should transition in and out completely 1`] = `
 "Render 1:
     +  <div
@@ -92,6 +128,25 @@ Render 6: Transition took at least 100ms
     -  </div>"
 `;
 
+exports[`Transition > Shallow Transitions > should transition in completely (generated classes) 1`] = `
+"Render 1:
+    +  <div
+    +    class="transitionElement-enter-active transitionElement-enter"
+    +  >
+    +    <span>
+    +      Hello!
+    +    </span>
+    +  </div>
+
+Render 2:
+    -  class="transitionElement-enter-active transitionElement-enter"
+    +  class="transitionElement-enter-active transitionElement-enter-to"
+
+Render 3: Transition took at least 75ms
+    -  class="transitionElement-enter-active transitionElement-enter-to"
+    +  class"
+`;
+
 exports[`Transition > Shallow Transitions > should transition in completely 1`] = `
 "Render 1:
     +  <div
@@ -109,6 +164,27 @@ Render 2:
 Render 3: Transition took at least 75ms
     -  class="duration-75 opacity-100"
     +  class"
+`;
+
+exports[`Transition > Shallow Transitions > should transition out completely (generated classes) 1`] = `
+"Render 1:
+    -  <div>
+    +  <div
+    +    class="transitionElement-exit-active transitionElement-exit"
+    +  >
+
+Render 2:
+    -  class="transitionElement-exit-active transitionElement-exit"
+    +  class="transitionElement-exit-active transitionElement-exit-to"
+
+Render 3: Transition took at least 75ms
+    -  <div
+    -    class="transitionElement-exit-active transitionElement-exit-to"
+    -  >
+    -    <span>
+    -      Hello!
+    -    </span>
+    -  </div>"
 `;
 
 exports[`Transition > Shallow Transitions > should transition out completely 1`] = `
