@@ -16,6 +16,11 @@ export default defineConfig(({ mode }) => {
       })
     ],
     test: {
+      coverage: {
+        provider: "v8",
+        include: ["src/**"],
+        reporter: ["text", "html"]
+      },
       watch: false,
       isolate: !testSSR,
       environment: testSSR ? "node" : "jsdom",

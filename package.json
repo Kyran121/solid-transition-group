@@ -25,6 +25,8 @@
     "test:client": "vitest",
     "test:ssr": "pnpm run test:client --mode ssr",
     "test": "concurrently pnpm:test:*",
+    "coverage:client": "vitest --watch --ui --coverage.enabled=true",
+    "coverage:ssr": "pnpm run coverage:client --mode ssr",
     "format": "prettier -w **/*.{js,ts,json,css,tsx,jsx} --ignore-path .gitignore",
     "release": "pnpm build && release-it"
   },
@@ -34,6 +36,7 @@
     "@release-it/keep-a-changelog": "^5.0.0",
     "@solidjs/testing-library": "^0.8.7",
     "@vitest/coverage-v8": "^1.6.0",
+    "@vitest/ui": "^1.6.0",
     "@vitest/utils": "^1.6.0",
     "astro": "^4.8.2",
     "concurrently": "^8.2.2",
