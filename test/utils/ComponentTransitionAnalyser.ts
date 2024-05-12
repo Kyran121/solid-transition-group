@@ -43,6 +43,10 @@ export default class ComponentTransitionAnalyser {
     this.transitonTriggers.push(transitionTrigger);
   }
 
+  public expectFollowUpTransition(expectedDuration: number) {
+    this.transitonTriggers.push({ execute: () => {}, expectedDuration });
+  }
+
   public async analyseTransitionActivity() {
     await this.captureTransitionSnapshots();
     return this.getTransitionActivityReport();
@@ -76,27 +80,32 @@ export default class ComponentTransitionAnalyser {
   private async waitDurationForTransitionToComplete() {
     /** wait for transition stages to complete (detailed in {@link getTransitionActivityReport}) */
     await this.waitForNextFrame();
-    await this.waitForDuration(this.extractDurationFromTransitioningElement());
+    await this.waitForDuration(this.extractHighestDurationFromTransitioningElements());
 
     this.dispatchAnimationEndEvent(); // See https://github.com/jsdom/jsdom/issues/3239
     await this.waitForNextFrame(); // Wait additional frame to ensure completion
   }
 
-  private extractDurationFromTransitioningElement(): number {
-    const transitionDuration = getComputedStyle(this.getTransitioningElement()).transitionDuration;
-    if (!transitionDuration) {
-      throw new Error("Unable to extract transitionDuration style from transition container child!");
+  private extractHighestDurationFromTransitioningElements(): number {
+    const transitionDurations = Array.from(this.getTransitioningElements()).map(
+      transitioningElement =>
+        parseInt(window.getComputedStyle(transitioningElement).transitionDuration)
+    );
+    let transitionDuration = transitionDurations[0]!;
+    for (let i = 1; i < transitionDurations.length; i++) {
+      transitionDuration = Math.max(transitionDurations[i]!, transitionDuration);
     }
-    return parseInt(transitionDuration);
+    return transitionDuration;
   }
 
-  private getTransitioningElement(): Element {
-    /** 
-     * It is guaranteed there will be a child in {@link Transition} when this method is called.
-     * This method is called after stages 1 and 2 of an ongoing transition.
-     */
-    const transitioningElement = this.transitionContainer.firstChild;
-    return transitioningElement as Element;
+  private getTransitioningElements(): HTMLDivElement[] {
+    const transitioning = Array.from(this.transitionContainer.querySelectorAll("div")).filter(
+      transitioningElement => window.getComputedStyle(transitioningElement).transitionDuration
+    );
+    if (transitioning.length === 0) {
+      throw new Error("Unable to extract transitionDuration style from transition container child!");
+    }
+    return transitioning;
   }
 
   private async waitForNextFrame() {
@@ -108,7 +117,9 @@ export default class ComponentTransitionAnalyser {
   }
 
   private dispatchAnimationEndEvent() {
-    this.transitionContainer.firstChild?.dispatchEvent(new Event("animationend"));
+    this.getTransitioningElements().forEach(transitioningElement =>
+      transitioningElement.dispatchEvent(new Event("animationend"))
+    );
   }
 
   /**
@@ -121,22 +132,22 @@ export default class ComponentTransitionAnalyser {
    * How?
    *
    * Apart the initial render, snapshots of the transition container are captured when
-   * content has changed. There are 3 changes which happen when we execute a transition
+   * content has changed. There are 3 stages which happen when we execute a transition
    * via {@link Transition}
    *
-   * Change 1 - Applied immediately (no wait time)
+   * Stage 1 - Applied immediately (no wait time)
    *   - Applying "base" and "from" classes
    *   - When entering, "base" class is {@link TransitionProps.enterActiveClass},
    *     and "from" class is {@link TransitionProps.enterClass}
    *   - When exiting, "base" class is {@link TransitionProps.exitActiveClass},
    *     and "from" class is {@link TransitionProps.exitClass}
    *
-   * Change 2 - Applied next browser frame
+   * Stage 2 - Applied next browser frame
    *   - Removing "from" and applying "to" class
    *   - When entering, "to" class is {@link TransitionProps.enterToClass}
    *   - When exiting, "to" class is {@link TransitionProps.exitToClass}
    *
-   * Change 3 - Applied after duration
+   * Stage 3 - Applied after duration
    *   - Removing "base" and "to" classes
    *
    * To calculate the actual time taken, we need to find out how long it takes to get these
@@ -145,34 +156,33 @@ export default class ComponentTransitionAnalyser {
    */
   private getTransitionActivityReport() {
     let formattedReport = "";
+    let stage = 1,
+      transiton = 1;
 
+    const durations: number[] = this.transitonTriggers.map(trigger => trigger.expectedDuration);
     for (let change = 1; change < this.capturedSnapshots.length; change++) {
       formattedReport += `Render ${change}:`;
 
-      if (this.isFinalChangeOfTransition(change)) {
-        const duration = this.getTransitionDurationForChange(change);
-        this.assertTransitionChangeTookExpectedDuration(change, duration);
+      if (stage % TRANSITION_STAGES === 0) {
+        stage = Number(this.snapshotAtChangeInEnterTransition(change));
+        const duration = durations.shift();
+        this.assertNthTransitionChangeTookDuration(transiton++, change, duration!);
         formattedReport += ` Transition took at least ${duration}ms`;
       }
 
       formattedReport += `\n${this.diffBetweenSnapshotsAtChanges(change, change - 1)}\n\n`;
+      stage++;
     }
     return formattedReport.trim();
   }
 
-  private isFinalChangeOfTransition(change: number) {
-    return change % TRANSITION_STAGES === 0;
+  private snapshotAtChangeInEnterTransition(change: number) {
+    return this.capturedSnapshots[change]!.content.indexOf("enter-active") !== -1;
   }
 
-  private getTransitionDurationForChange(change: number) {
-    const transitionIndex = this.getTransitionIndexForChange(change);
-    return this.transitonTriggers[transitionIndex]?.expectedDuration!;
-  }
-
-  private assertTransitionChangeTookExpectedDuration(change: number, duration: number) {
-    const transitionIndex = this.getTransitionIndexForChange(change);
+  private assertNthTransitionChangeTookDuration(n: number, change: number, duration: number) {
     if (!this.transitionChangeTookDuration(change, duration)) {
-      throw new Error(`Transition #${transitionIndex + 1} failed to take at least ${duration}ms`);
+      throw new Error(`Transition #${n} failed to take at least ${duration}ms`);
     }
   }
 
@@ -180,10 +190,6 @@ export default class ComponentTransitionAnalyser {
     const frameWaitTime = this.timeElapsedInMsBetweenSnapshotsAtChanges(change - 1, change - 2);
     const actualDuration = this.timeElapsedInMsBetweenSnapshotsAtChanges(change, change - 2);
     return actualDuration >= duration && actualDuration <= duration + frameWaitTime * 2;
-  }
-
-  private getTransitionIndexForChange(change: number) {
-    return Math.floor(change / TRANSITION_STAGES) - 1;
   }
 
   private timeElapsedInMsBetweenSnapshotsAtChanges(current: number, previous: number): number {

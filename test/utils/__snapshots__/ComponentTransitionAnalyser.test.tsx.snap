@@ -3,7 +3,7 @@
 exports[`ComponentTransitionAnalyser > analyseTransitionActivity > correctly analyses activity for an element which enters 1`] = `
 "Render 1:
     +  <div
-    +    class="duration-75 opacity-0"
+    +    class="duration-75 enter-active opacity-0 enter"
     +  >
     +    <span>
     +      Hello!
@@ -11,11 +11,11 @@ exports[`ComponentTransitionAnalyser > analyseTransitionActivity > correctly ana
     +  </div>
 
 Render 2:
-    -  class="duration-75 opacity-0"
-    +  class="duration-75 opacity-100"
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
 
 Render 3: Transition took at least 75ms
-    -  class="duration-75 opacity-100"
+    -  class="duration-75 enter-active opacity-100 enter-to"
     +  class"
 `;
 
@@ -23,16 +23,16 @@ exports[`ComponentTransitionAnalyser > analyseTransitionActivity > correctly ana
 "Render 1:
     -  <div>
     +  <div
-    +    class="duration-75 opacity-100"
+    +    class="duration-75 exit-active opacity-100 exit"
     +  >
 
 Render 2:
-    -  class="duration-75 opacity-100"
-    +  class="duration-75 opacity-0"
+    -  class="duration-75 exit-active opacity-100 exit"
+    +  class="duration-75 exit-active opacity-0 exit-to"
 
 Render 3: Transition took at least 75ms
     -  <div
-    -    class="duration-75 opacity-0"
+    -    class="duration-75 exit-active opacity-0 exit-to"
     -  >
     -    <span>
     -      Hello!
@@ -43,7 +43,7 @@ Render 3: Transition took at least 75ms
 exports[`ComponentTransitionAnalyser > analyseTransitionActivity > correctly analyses activity for element which enters and leaves 1`] = `
 "Render 1:
     +  <div
-    +    class="duration-75 opacity-0"
+    +    class="duration-75 enter-active opacity-0 enter"
     +  >
     +    <span>
     +      Hello!
@@ -51,24 +51,24 @@ exports[`ComponentTransitionAnalyser > analyseTransitionActivity > correctly ana
     +  </div>
 
 Render 2:
-    -  class="duration-75 opacity-0"
-    +  class="duration-75 opacity-100"
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
 
 Render 3: Transition took at least 75ms
-    -  class="duration-75 opacity-100"
+    -  class="duration-75 enter-active opacity-100 enter-to"
     +  class
 
 Render 4:
     -  class
-    +  class="duration-100 opacity-100"
+    +  class="duration-100 exit-active opacity-100 exit"
 
 Render 5:
-    -  class="duration-100 opacity-100"
-    +  class="duration-100 opacity-0"
+    -  class="duration-100 exit-active opacity-100 exit"
+    +  class="duration-100 exit-active opacity-0 exit-to"
 
 Render 6: Transition took at least 100ms
     -  <div
-    -    class="duration-100 opacity-0"
+    -    class="duration-100 exit-active opacity-0 exit-to"
     -  >
     -    <span>
     -      Hello!

@@ -3,7 +3,7 @@
 exports[`Transition > Events > should fire events for all the stages 1`] = `
 "Render 1:
     +  <div
-    +    class="duration-75 opacity-0"
+    +    class="duration-75 enter-active opacity-0 enter"
     +  >
     +    <span>
     +      Hello!
@@ -11,24 +11,24 @@ exports[`Transition > Events > should fire events for all the stages 1`] = `
     +  </div>
 
 Render 2:
-    -  class="duration-75 opacity-0"
-    +  class="duration-75 opacity-100"
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
 
 Render 3: Transition took at least 75ms
-    -  class="duration-75 opacity-100"
+    -  class="duration-75 enter-active opacity-100 enter-to"
     +  class
 
 Render 4:
     -  class
-    +  class="duration-100 opacity-100"
+    +  class="duration-100 exit-active opacity-100 exit"
 
 Render 5:
-    -  class="duration-100 opacity-100"
-    +  class="duration-100 opacity-0"
+    -  class="duration-100 exit-active opacity-100 exit"
+    +  class="duration-100 exit-active opacity-0 exit-to"
 
 Render 6: Transition took at least 100ms
     -  <div
-    -    class="duration-100 opacity-0"
+    -    class="duration-100 exit-active opacity-0 exit-to"
     -  >
     -    <span>
     -      Hello!
@@ -38,7 +38,7 @@ Render 6: Transition took at least 100ms
 
 exports[`Transition > Setup > 'base' and 'from' classes applied immediately to transition element when show=true and appear=true 1`] = `
 "<div
-  class="duration-75 opacity-0"
+  class="duration-75 enter-active opacity-0 enter"
 >
   <span>
     Hello!
@@ -56,7 +56,97 @@ exports[`Transition > Setup > transition element immediately shown when show=tru
 </div>"
 `;
 
-exports[`Transition > Shallow Transitions > should transition in and out completely (generated classes) 1`] = `
+exports[`Transition > Shallow Transitions > Switch > in-out 1`] = `
+"Render 1:
+    +  <div
+    +    class="duration-75 enter-active opacity-0 enter"
+    +  >
+    +    2
+    +  </div>
+
+Render 2:
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
+
+Render 3: Transition took at least 75ms
+    -    class="duration-75 enter-active opacity-100 enter-to"
+    +    class
+    ---
+    -  <div>
+    +  <div
+    +    class="duration-100 exit-active opacity-100 exit"
+    +  >
+
+Render 4:
+    -  class="duration-100 exit-active opacity-100 exit"
+    +  class="duration-100 exit-active opacity-0 exit-to"
+
+Render 5:
+    -  <div
+    -    class="duration-100 exit-active opacity-0 exit-to"
+    -  >
+    -    1
+    -  </div>"
+`;
+
+exports[`Transition > Shallow Transitions > Switch > out-in 1`] = `
+"Render 1:
+    -  <div>
+    +  <div
+    +    class="duration-100 exit-active opacity-100 exit"
+    +  >
+
+Render 2:
+    -  class="duration-100 exit-active opacity-100 exit"
+    +  class="duration-100 exit-active opacity-0 exit-to"
+
+Render 3: Transition took at least 100ms
+    -  class="duration-100 exit-active opacity-0 exit-to"
+    +  class="duration-75 enter-active opacity-0 enter"
+    ---
+    -  1
+    +  2
+
+Render 4:
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
+
+Render 5: Transition took at least 75ms
+    -  class="duration-75 enter-active opacity-100 enter-to"
+    +  class"
+`;
+
+exports[`Transition > Shallow Transitions > Switch > parallel 1`] = `
+"Render 1:
+    -  <div>
+    +  <div
+    +    class="duration-75 enter-active opacity-0 enter"
+    +  >
+    +    2
+    +  </div>
+    +  <div
+    +    class="duration-75 exit-active opacity-100 exit"
+    +  >
+
+Render 2:
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
+    ---
+    -  class="duration-75 exit-active opacity-100 exit"
+    +  class="duration-75 exit-active opacity-0 exit-to"
+
+Render 3: Transition took at least 75ms
+    -    class="duration-75 enter-active opacity-100 enter-to"
+    +    class
+    ---
+    -  </div>
+    -  <div
+    -    class="duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    1"
+`;
+
+exports[`Transition > Shallow Transitions > Toggle > should transition in and out completely (generated classes) 1`] = `
 "Render 1:
     +  <div
     +    class="transitionElement-enter-active transitionElement-enter"
@@ -92,10 +182,10 @@ Render 6: Transition took at least 100ms
     -  </div>"
 `;
 
-exports[`Transition > Shallow Transitions > should transition in and out completely 1`] = `
+exports[`Transition > Shallow Transitions > Toggle > should transition in and out completely 1`] = `
 "Render 1:
     +  <div
-    +    class="duration-75 opacity-0"
+    +    class="duration-75 enter-active opacity-0 enter"
     +  >
     +    <span>
     +      Hello!
@@ -103,24 +193,24 @@ exports[`Transition > Shallow Transitions > should transition in and out complet
     +  </div>
 
 Render 2:
-    -  class="duration-75 opacity-0"
-    +  class="duration-75 opacity-100"
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
 
 Render 3: Transition took at least 75ms
-    -  class="duration-75 opacity-100"
+    -  class="duration-75 enter-active opacity-100 enter-to"
     +  class
 
 Render 4:
     -  class
-    +  class="duration-100 opacity-100"
+    +  class="duration-100 exit-active opacity-100 exit"
 
 Render 5:
-    -  class="duration-100 opacity-100"
-    +  class="duration-100 opacity-0"
+    -  class="duration-100 exit-active opacity-100 exit"
+    +  class="duration-100 exit-active opacity-0 exit-to"
 
 Render 6: Transition took at least 100ms
     -  <div
-    -    class="duration-100 opacity-0"
+    -    class="duration-100 exit-active opacity-0 exit-to"
     -  >
     -    <span>
     -      Hello!
@@ -128,7 +218,7 @@ Render 6: Transition took at least 100ms
     -  </div>"
 `;
 
-exports[`Transition > Shallow Transitions > should transition in completely (generated classes) 1`] = `
+exports[`Transition > Shallow Transitions > Toggle > should transition in completely (generated classes) 1`] = `
 "Render 1:
     +  <div
     +    class="transitionElement-enter-active transitionElement-enter"
@@ -147,10 +237,10 @@ Render 3: Transition took at least 75ms
     +  class"
 `;
 
-exports[`Transition > Shallow Transitions > should transition in completely 1`] = `
+exports[`Transition > Shallow Transitions > Toggle > should transition in completely 1`] = `
 "Render 1:
     +  <div
-    +    class="duration-75 opacity-0"
+    +    class="duration-75 enter-active opacity-0 enter"
     +  >
     +    <span>
     +      Hello!
@@ -158,15 +248,15 @@ exports[`Transition > Shallow Transitions > should transition in completely 1`] 
     +  </div>
 
 Render 2:
-    -  class="duration-75 opacity-0"
-    +  class="duration-75 opacity-100"
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
 
 Render 3: Transition took at least 75ms
-    -  class="duration-75 opacity-100"
+    -  class="duration-75 enter-active opacity-100 enter-to"
     +  class"
 `;
 
-exports[`Transition > Shallow Transitions > should transition out completely (generated classes) 1`] = `
+exports[`Transition > Shallow Transitions > Toggle > should transition out completely (generated classes) 1`] = `
 "Render 1:
     -  <div>
     +  <div
@@ -187,20 +277,20 @@ Render 3: Transition took at least 75ms
     -  </div>"
 `;
 
-exports[`Transition > Shallow Transitions > should transition out completely 1`] = `
+exports[`Transition > Shallow Transitions > Toggle > should transition out completely 1`] = `
 "Render 1:
     -  <div>
     +  <div
-    +    class="duration-75 opacity-100"
+    +    class="duration-75 exit-active opacity-100 exit"
     +  >
 
 Render 2:
-    -  class="duration-75 opacity-100"
-    +  class="duration-75 opacity-0"
+    -  class="duration-75 exit-active opacity-100 exit"
+    +  class="duration-75 exit-active opacity-0 exit-to"
 
 Render 3: Transition took at least 75ms
     -  <div
-    -    class="duration-75 opacity-0"
+    -    class="duration-75 exit-active opacity-0 exit-to"
     -  >
     -    <span>
     -      Hello!

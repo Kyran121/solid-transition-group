@@ -21,7 +21,7 @@ export function snapshotDiff(previous: string, current: string): string {
 
 function cleanDiffAnnotations(diffOutput: string): string {
   return diffOutput
-    .replace(/\n+@@([^@@]*)@@/g, "") // Remove top level @@ signs
+    .replace(/\n+@@([^@@]*)@@/, "") // Remove top level @@ signs
     .replace(/@@([^@@]*)@@/g, "---") // Replace in-between @@ signs with '---'
     .replace(/[-+] __REMOVE_ME__\n/g, ""); // Remove annotation lines
 }
