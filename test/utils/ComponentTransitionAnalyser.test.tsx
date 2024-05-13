@@ -1,17 +1,18 @@
+import type { Component } from "solid-js";
+import type { TransitionComponent, TransitionTrigger } from "./ComponentTransitionAnalyser";
+import type {
+  SwitchTransitionProps,
+  ToggleTransitionProps,
+  TransitionClasses,
+  TransitionDurations,
+  TransitionName
+} from "./TransitionTypes";
 import { describe, it } from "vitest";
-import { createSignal, Show, type Component } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { Transition } from "../../src";
-import ComponentTransitionAnalyser, {
-  type TransitionComponent
-} from "./ComponentTransitionAnalyser";
+import ComponentTransitionAnalyser from "./ComponentTransitionAnalyser";
 import { fireEvent } from "@solidjs/testing-library";
 import "./ComponentTransitionAnalyser.css";
-
-type TransitionProps = {
-  show?: boolean;
-  enterDuration?: number;
-  exitDuration?: number;
-};
 
 describe.concurrent("ComponentTransitionAnalyser", () => {
   describe("analyseTransitionActivity", () => {
@@ -27,7 +28,7 @@ describe.concurrent("ComponentTransitionAnalyser", () => {
       componentTransitionAnalyser.addTransitionTrigger(clickToggleButtonWaitingDuration(75));
 
       expect(componentTransitionAnalyser.analyseTransitionActivity()).rejects.toThrow(
-        "Unable to extract transitionDuration style from transition container child!"
+        "Unable to find any transitioning elements at parent level"
       );
     });
 
@@ -68,7 +69,7 @@ describe.concurrent("ComponentTransitionAnalyser", () => {
       expect(activityReport).toMatchSnapshot();
     });
 
-    it("correctly analyses activity for an element which leaves", async ({ expect }) => {
+    it("correctly analyses activity for an element which exits", async ({ expect }) => {
       const exitDuration = 75;
 
       const TransitionComponent = createTransitionComponent({
@@ -85,7 +86,7 @@ describe.concurrent("ComponentTransitionAnalyser", () => {
       expect(activityReport).toMatchSnapshot();
     });
 
-    it("correctly analyses activity for element which enters and leaves", async ({ expect }) => {
+    it("correctly analyses activity for element which enters and exits", async ({ expect }) => {
       const enterDuration = 75;
       const exitDuration = 100;
 
@@ -107,7 +108,90 @@ describe.concurrent("ComponentTransitionAnalyser", () => {
       expect(activityReport).toMatchSnapshot();
     });
 
-    function createTransitionComponent(props: TransitionProps): Component {
+    it("correctly analyses activity for an old element exiting followed by a new element entering (out-in)", async ({
+      expect
+    }) => {
+      const enterDuration = 75;
+      const exitDuration = 100;
+      const mode = "outin";
+
+      const TransitionComponent = createSwitchTransitionComponent({
+        enterDuration,
+        exitDuration,
+        mode
+      });
+
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(
+        clickNextButtonWaitingDuration(exitDuration)
+      );
+      componentTransitionAnalyser.expectFollowUpTransition(enterDuration);
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
+
+    it("correctly analyses activity for a new element entering followed by an old element exiting (in-out)", async ({
+      expect
+    }) => {
+      const enterDuration = 75;
+      const exitDuration = 100;
+      const mode = "inout";
+
+      const TransitionComponent = createSwitchTransitionComponent({
+        enterDuration,
+        exitDuration,
+        mode
+      });
+
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(
+        clickNextButtonWaitingDuration(enterDuration)
+      );
+      componentTransitionAnalyser.expectFollowUpTransition(exitDuration);
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
+
+    it("correctly analyses activity for a new element entering and old element exiting at the same time (same duration)", async ({
+      expect
+    }) => {
+      const duration = 75;
+
+      const TransitionComponent = createSwitchTransitionComponent({
+        enterDuration: duration,
+        exitDuration: duration
+      });
+
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(clickNextButtonWaitingDuration(duration));
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
+
+    it("correctly analyses activity for a new element entering and old element exiting at the same time (different durations)", async ({
+      expect
+    }) => {
+      const enterDuration = 75;
+      const exitDuration = 100;
+
+      const TransitionComponent = createSwitchTransitionComponent({
+        enterDuration,
+        exitDuration
+      });
+
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(
+        clickNextButtonWaitingDuration(Math.max(enterDuration, exitDuration))
+      );
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
+
+    function createTransitionComponent(props: ToggleTransitionProps): Component {
       return () => {
         const [show, setShow] = createSignal(props.show);
 
@@ -137,7 +221,48 @@ describe.concurrent("ComponentTransitionAnalyser", () => {
       };
     }
 
-    function clickToggleButtonWaitingDuration(expectedDuration: number) {
+    function createSwitchTransitionComponent(props: SwitchTransitionProps): Component {
+      return () => {
+        const [page, setPage] = createSignal(1);
+        const classProps = createClassProps(props);
+
+        return (
+          <>
+            <div data-testid="transition-container">
+              <Transition name={props.name} mode={props.mode} {...classProps}>
+                <Show when={page()} keyed>
+                  {i => <div>{i}</div>}
+                </Show>
+              </Transition>
+            </div>
+            <button data-testid="next" onClick={() => setPage(page => ++page)}>
+              Next
+            </button>
+          </>
+        );
+      };
+    }
+
+    function createClassProps(props: TransitionName & TransitionDurations): TransitionClasses {
+      if (props.name) {
+        return {};
+      }
+      return {
+        enterActiveClass: `duration-${props.enterDuration} enter-active`,
+        enterClass: "opacity-0 enter",
+        enterToClass: "opacity-100 enter-to",
+        exitActiveClass: `duration-${props.exitDuration} exit-active`,
+        exitClass: "opacity-100 exit",
+        exitToClass: "opacity-0 exit-to"
+      };
+    }
+
+    function clickNextButtonWaitingDuration(expectedDuration: number): TransitionTrigger {
+      const execute = (tools: TransitionComponent) => fireEvent.click(tools.getByTestId("next"));
+      return { execute, expectedDuration };
+    }
+
+    function clickToggleButtonWaitingDuration(expectedDuration: number): TransitionTrigger {
       const execute = (tools: TransitionComponent) => fireEvent.click(tools.getByTestId("toggle"));
       return { execute, expectedDuration };
     }

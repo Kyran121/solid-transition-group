@@ -88,8 +88,7 @@ export default class ComponentTransitionAnalyser {
 
   private extractHighestDurationFromTransitioningElements(): number {
     const transitionDurations = Array.from(this.getTransitioningElements()).map(
-      transitioningElement =>
-        parseInt(window.getComputedStyle(transitioningElement).transitionDuration)
+      this.getTransitionDuration
     );
     let transitionDuration = transitionDurations[0]!;
     for (let i = 1; i < transitionDurations.length; i++) {
@@ -100,12 +99,16 @@ export default class ComponentTransitionAnalyser {
 
   private getTransitioningElements(): HTMLDivElement[] {
     const transitioning = Array.from(this.transitionContainer.querySelectorAll("div")).filter(
-      transitioningElement => window.getComputedStyle(transitioningElement).transitionDuration
+      this.getTransitionDuration
     );
     if (transitioning.length === 0) {
-      throw new Error("Unable to extract transitionDuration style from transition container child!");
+      throw new Error("Unable to find any transitioning elements at parent level");
     }
     return transitioning;
+  }
+
+  private getTransitionDuration(element: HTMLDivElement): number {
+    return parseInt(window.getComputedStyle(element).transitionDuration);
   }
 
   private async waitForNextFrame() {

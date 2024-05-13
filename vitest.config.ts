@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) => {
             include: ["test/server.test.{ts,tsx}"]
           }
         : {
-            include: ["test/**/*.test.{ts,tsx}"],
+            include: ["test/*.test.{ts,tsx}"],
             exclude: ["test/server.test.{ts,tsx}"]
           }),
       // optimisation

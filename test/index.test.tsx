@@ -1,40 +1,25 @@
-import { Show } from "solid-js";
+import type { Component } from "solid-js";
+import type { TransitionEvents } from "../src";
+import type { TransitionComponent, TransitionTrigger } from "./utils/ComponentTransitionAnalyser";
+import type {
+  SwitchTransitionProps,
+  ToggleTransitionProps,
+  TransitionClasses,
+  TransitionDurations,
+  TransitionName
+} from "./utils/TransitionTypes";
+import { Show, Suspense, createRenderEffect, createResource, untrack } from "solid-js";
 import { describe, test, it, vi } from "vitest";
-import { Transition, type TransitionProps, type TransitionEvents } from "../src";
+import { Transition } from "../src";
 import { fireEvent, render } from "@solidjs/testing-library";
-import { createSignal, type Component } from "solid-js";
+import { createSignal } from "solid-js";
 import { formatHTML } from "./utils/HTMLFormatter";
-import ComponentTransitionAnalyser, {
-  type TransitionComponent
-} from "./utils/ComponentTransitionAnalyser";
+import ComponentTransitionAnalyser from "./utils/ComponentTransitionAnalyser";
 import "./index.css";
 
 const TRANSITION_CONTAINER_ID = "transition-container";
 
 type EventHandler = (...args: any[]) => void;
-
-type TransitionName = { name?: string };
-type TransitionDurations = {
-  enterDuration?: number;
-  exitDuration?: number;
-};
-type ToggleTransitionProps = TransitionEvents &
-  TransitionName &
-  TransitionDurations & {
-    show: boolean;
-    appear?: boolean;
-  };
-type SwitchTransitionProps = TransitionName & TransitionDurations & Pick<TransitionProps, "mode">;
-
-type TransitionClasses = Pick<
-  TransitionProps,
-  | "enterActiveClass"
-  | "enterClass"
-  | "enterToClass"
-  | "exitActiveClass"
-  | "exitClass"
-  | "exitToClass"
->;
 
 describe.concurrent("Transition", () => {
   describe("Setup", () => {
@@ -353,6 +338,7 @@ describe.concurrent("Transition", () => {
       );
     };
   }
+
   function createClassProps(props: TransitionName & TransitionDurations): TransitionClasses {
     if (props.name) {
       return {};
@@ -367,12 +353,12 @@ describe.concurrent("Transition", () => {
     };
   }
 
-  function clickToggleButtonWaitingDuration(expectedDuration: number) {
+  function clickToggleButtonWaitingDuration(expectedDuration: number): TransitionTrigger {
     const execute = (tools: TransitionComponent) => fireEvent.click(tools.getByTestId("toggle"));
     return { execute, expectedDuration };
   }
 
-  function clickNextButtonWaitingDuration(expectedDuration: number) {
+  function clickNextButtonWaitingDuration(expectedDuration: number): TransitionTrigger {
     const execute = (tools: TransitionComponent) => fireEvent.click(tools.getByTestId("next"));
     return { execute, expectedDuration };
   }
