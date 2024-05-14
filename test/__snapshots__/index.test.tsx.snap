@@ -116,7 +116,37 @@ Render 5: Transition took at least 75ms
     +  class"
 `;
 
-exports[`Transition > Shallow Transitions > Switch > parallel 1`] = `
+exports[`Transition > Shallow Transitions > Switch > parallel > different durations 1`] = `
+"Render 1:
+    -  <div>
+    +  <div
+    +    class="duration-75 enter-active opacity-0 enter"
+    +  >
+    +    2
+    +  </div>
+    +  <div
+    +    class="duration-100 exit-active opacity-100 exit"
+    +  >
+
+Render 2:
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
+    ---
+    -  class="duration-100 exit-active opacity-100 exit"
+    +  class="duration-100 exit-active opacity-0 exit-to"
+
+Render 3: Transition took at least 100ms
+    -    class="duration-75 enter-active opacity-100 enter-to"
+    +    class
+    ---
+    -  </div>
+    -  <div
+    -    class="duration-100 exit-active opacity-0 exit-to"
+    -  >
+    -    1"
+`;
+
+exports[`Transition > Shallow Transitions > Switch > parallel > same duration 1`] = `
 "Render 1:
     -  <div>
     +  <div

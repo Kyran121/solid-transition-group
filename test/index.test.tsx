@@ -162,7 +162,7 @@ describe.concurrent("Transition", () => {
     });
 
     describe("Switch", () => {
-      it("out-in", async ({ expect }) => {
+      test("out-in", async ({ expect }) => {
         const enterDuration = 75;
         const exitDuration = 100;
         const mode = "outin";
@@ -183,7 +183,7 @@ describe.concurrent("Transition", () => {
         expect(activityReport).toMatchSnapshot();
       });
 
-      it("in-out", async ({ expect }) => {
+      test("in-out", async ({ expect }) => {
         const enterDuration = 75;
         const exitDuration = 100;
         const mode = "inout";
@@ -204,19 +204,36 @@ describe.concurrent("Transition", () => {
         expect(activityReport).toMatchSnapshot();
       });
 
-      it("parallel", async ({ expect }) => {
-        const duration = 75;
+      describe("parallel", () => {
+        test("same duration", async ({ expect }) => {
+          const duration = 75;
 
-        const TransitionComponent = createSwitchTransitionComponent({
-          enterDuration: duration,
-          exitDuration: duration
+          const TransitionComponent = createSwitchTransitionComponent({
+            enterDuration: duration,
+            exitDuration: duration
+          });
+
+          const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+          componentTransitionAnalyser.addTransitionTrigger(clickNextButtonWaitingDuration(duration));
+
+          const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+          expect(activityReport).toMatchSnapshot();
         });
+        test("different durations", async ({ expect }) => {
+          const enterDuration = 75;
+          const exitDuration = 100;
+       
+          const TransitionComponent = createSwitchTransitionComponent({
+            enterDuration,
+            exitDuration
+          });
 
-        const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
-        componentTransitionAnalyser.addTransitionTrigger(clickNextButtonWaitingDuration(duration));
+          const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+          componentTransitionAnalyser.addTransitionTrigger(clickNextButtonWaitingDuration(Math.max(enterDuration, exitDuration)));
 
-        const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
-        expect(activityReport).toMatchSnapshot();
+          const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+          expect(activityReport).toMatchSnapshot();
+        });
       });
     });
   });
