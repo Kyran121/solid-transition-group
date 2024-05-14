@@ -15,6 +15,7 @@ export type ToggleTransitionProps = TransitionEvents &
 export type SwitchTransitionProps = TransitionName &
   TransitionDurations &
   Pick<TransitionProps, "mode">;
+export type ListTransitionProps = Omit<ToggleTransitionProps, "show">;
 
 export type TransitionClasses = Pick<
   TransitionProps,

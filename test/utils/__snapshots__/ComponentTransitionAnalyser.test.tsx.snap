@@ -1,5 +1,124 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`ComponentTransitionAnalyser > analyseTransitionActivity > correctly analyses activity for a list of elements which enter and exit 1`] = `
+"Render 1:
+    +  <div
+    +    class="value-5 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      5
+    +    </span>
+    +  </div>
+    +  <div
+    +    class="value-6 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      6
+    +    </span>
+    +  </div>
+
+Render 2:
+    -  class="value-5 duration-75 enter-active opacity-0 enter"
+    +  class="value-5 duration-75 enter-active opacity-100 enter-to"
+    ---
+    -  class="value-6 duration-75 enter-active opacity-0 enter"
+    +  class="value-6 duration-75 enter-active opacity-100 enter-to"
+
+Render 3: Transition took at least 75ms
+    -  class="value-5 duration-75 enter-active opacity-100 enter-to"
+    +  class="value-5"
+    ---
+    -  class="value-6 duration-75 enter-active opacity-100 enter-to"
+    +  class="value-6"
+
+Render 4:
+    -  class="value-1"
+    +  class="value-1 duration-75 exit-active opacity-100 exit"
+    ---
+    -  class="value-2"
+    +  class="value-2 duration-75 exit-active opacity-100 exit"
+
+Render 5:
+    -  class="value-1 duration-75 exit-active opacity-100 exit"
+    +  class="value-1 duration-75 exit-active opacity-0 exit-to"
+    ---
+    -  class="value-2 duration-75 exit-active opacity-100 exit"
+    +  class="value-2 duration-75 exit-active opacity-0 exit-to"
+
+Render 6: Transition took at least 75ms
+    -    class="value-1 duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      1
+    -    </span>
+    -  </div>
+    -  <div
+    -    class="value-2 duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      2
+    -    </span>
+    -  </div>
+    -  <div
+
+Render 7:
+    -    class="value-3"
+    +    class="value-3 duration-75 exit-active opacity-100 exit"
+    ---
+    -    class="value-4"
+    +    class="value-4 duration-75 exit-active opacity-100 exit"
+    ---
+    +    </span>
+    +  </div>
+    +  <div
+    +    class="value-7 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      7
+    +    </span>
+    +  </div>
+    +  <div
+    +    class="value-8 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      8
+
+Render 8:
+    -  class="value-3 duration-75 exit-active opacity-100 exit"
+    +  class="value-3 duration-75 exit-active opacity-0 exit-to"
+    ---
+    -  class="value-4 duration-75 exit-active opacity-100 exit"
+    +  class="value-4 duration-75 exit-active opacity-0 exit-to"
+    ---
+    -  class="value-7 duration-75 enter-active opacity-0 enter"
+    +  class="value-7 duration-75 enter-active opacity-100 enter-to"
+    ---
+    -  class="value-8 duration-75 enter-active opacity-0 enter"
+    +  class="value-8 duration-75 enter-active opacity-100 enter-to"
+
+Render 9: Transition took at least 75ms
+    -    class="value-3 duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      3
+    -    </span>
+    -  </div>
+    -  <div
+    -    class="value-4 duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      4
+    -    </span>
+    -  </div>
+    -  <div
+    ---
+    -    class="value-7 duration-75 enter-active opacity-100 enter-to"
+    +    class="value-7"
+    ---
+    -    class="value-8 duration-75 enter-active opacity-100 enter-to"
+    +    class="value-8""
+`;
+
 exports[`ComponentTransitionAnalyser > analyseTransitionActivity > correctly analyses activity for a new element entering and old element exiting at the same time (different durations) 1`] = `
 "Render 1:
     -  <div>
