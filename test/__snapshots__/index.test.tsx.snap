@@ -56,7 +56,67 @@ exports[`Transition > Setup > transition element immediately shown when show=tru
 </div>"
 `;
 
-exports[`Transition > Shallow Transitions > Switch > in-out 1`] = `
+exports[`Transition > Shallow Transitions > Switch > should transition in new element and transition out old element at the same time (parallel) > case 1: durations are the same 1`] = `
+"Render 1:
+    -  <div>
+    +  <div
+    +    class="duration-75 enter-active opacity-0 enter"
+    +  >
+    +    2
+    +  </div>
+    +  <div
+    +    class="duration-75 exit-active opacity-100 exit"
+    +  >
+
+Render 2:
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
+    ---
+    -  class="duration-75 exit-active opacity-100 exit"
+    +  class="duration-75 exit-active opacity-0 exit-to"
+
+Render 3: Transition took at least 75ms
+    -    class="duration-75 enter-active opacity-100 enter-to"
+    +    class
+    ---
+    -  </div>
+    -  <div
+    -    class="duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    1"
+`;
+
+exports[`Transition > Shallow Transitions > Switch > should transition in new element and transition out old element at the same time (parallel) > case 2: durations are different 1`] = `
+"Render 1:
+    -  <div>
+    +  <div
+    +    class="duration-75 enter-active opacity-0 enter"
+    +  >
+    +    2
+    +  </div>
+    +  <div
+    +    class="duration-100 exit-active opacity-100 exit"
+    +  >
+
+Render 2:
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
+    ---
+    -  class="duration-100 exit-active opacity-100 exit"
+    +  class="duration-100 exit-active opacity-0 exit-to"
+
+Render 3: Transition took at least 100ms
+    -    class="duration-75 enter-active opacity-100 enter-to"
+    +    class
+    ---
+    -  </div>
+    -  <div
+    -    class="duration-100 exit-active opacity-0 exit-to"
+    -  >
+    -    1"
+`;
+
+exports[`Transition > Shallow Transitions > Switch > should transition in new element followed by transitioning old element out (in-out) 1`] = `
 "Render 1:
     +  <div
     +    class="duration-75 enter-active opacity-0 enter"
@@ -89,7 +149,7 @@ Render 5:
     -  </div>"
 `;
 
-exports[`Transition > Shallow Transitions > Switch > out-in 1`] = `
+exports[`Transition > Shallow Transitions > Switch > should transition out old element followed by transitioning new element in (out-in) 1`] = `
 "Render 1:
     -  <div>
     +  <div
@@ -114,66 +174,6 @@ Render 4:
 Render 5: Transition took at least 75ms
     -  class="duration-75 enter-active opacity-100 enter-to"
     +  class"
-`;
-
-exports[`Transition > Shallow Transitions > Switch > parallel > different durations 1`] = `
-"Render 1:
-    -  <div>
-    +  <div
-    +    class="duration-75 enter-active opacity-0 enter"
-    +  >
-    +    2
-    +  </div>
-    +  <div
-    +    class="duration-100 exit-active opacity-100 exit"
-    +  >
-
-Render 2:
-    -  class="duration-75 enter-active opacity-0 enter"
-    +  class="duration-75 enter-active opacity-100 enter-to"
-    ---
-    -  class="duration-100 exit-active opacity-100 exit"
-    +  class="duration-100 exit-active opacity-0 exit-to"
-
-Render 3: Transition took at least 100ms
-    -    class="duration-75 enter-active opacity-100 enter-to"
-    +    class
-    ---
-    -  </div>
-    -  <div
-    -    class="duration-100 exit-active opacity-0 exit-to"
-    -  >
-    -    1"
-`;
-
-exports[`Transition > Shallow Transitions > Switch > parallel > same duration 1`] = `
-"Render 1:
-    -  <div>
-    +  <div
-    +    class="duration-75 enter-active opacity-0 enter"
-    +  >
-    +    2
-    +  </div>
-    +  <div
-    +    class="duration-75 exit-active opacity-100 exit"
-    +  >
-
-Render 2:
-    -  class="duration-75 enter-active opacity-0 enter"
-    +  class="duration-75 enter-active opacity-100 enter-to"
-    ---
-    -  class="duration-75 exit-active opacity-100 exit"
-    +  class="duration-75 exit-active opacity-0 exit-to"
-
-Render 3: Transition took at least 75ms
-    -    class="duration-75 enter-active opacity-100 enter-to"
-    +    class
-    ---
-    -  </div>
-    -  <div
-    -    class="duration-75 exit-active opacity-0 exit-to"
-    -  >
-    -    1"
 `;
 
 exports[`Transition > Shallow Transitions > Toggle > should transition in and out completely (generated classes) 1`] = `

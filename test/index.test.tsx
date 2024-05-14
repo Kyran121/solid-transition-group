@@ -162,7 +162,7 @@ describe.concurrent("Transition", () => {
     });
 
     describe("Switch", () => {
-      test("out-in", async ({ expect }) => {
+      it("should transition out old element followed by transitioning new element in (out-in)", async ({ expect }) => {
         const enterDuration = 75;
         const exitDuration = 100;
         const mode = "outin";
@@ -183,7 +183,7 @@ describe.concurrent("Transition", () => {
         expect(activityReport).toMatchSnapshot();
       });
 
-      test("in-out", async ({ expect }) => {
+      it("should transition in new element followed by transitioning old element out (in-out)", async ({ expect }) => {
         const enterDuration = 75;
         const exitDuration = 100;
         const mode = "inout";
@@ -204,8 +204,8 @@ describe.concurrent("Transition", () => {
         expect(activityReport).toMatchSnapshot();
       });
 
-      describe("parallel", () => {
-        test("same duration", async ({ expect }) => {
+      describe("should transition in new element and transition out old element at the same time (parallel)", () => {
+        test("case 1: durations are the same", async ({ expect }) => {
           const duration = 75;
 
           const TransitionComponent = createSwitchTransitionComponent({
@@ -219,7 +219,7 @@ describe.concurrent("Transition", () => {
           const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
           expect(activityReport).toMatchSnapshot();
         });
-        test("different durations", async ({ expect }) => {
+        test("case 2: durations are different", async ({ expect }) => {
           const enterDuration = 75;
           const exitDuration = 100;
        
