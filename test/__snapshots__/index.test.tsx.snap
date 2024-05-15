@@ -327,3 +327,188 @@ Render 3: Transition took at least 75ms
     -    </span>
     -  </div>"
 `;
+
+exports[`TransitionGroup > Events > should fire events for all stages 1`] = `
+"Render 1:
+    -  class="value-1"
+    +  class="value-1 duration-100 exit-active opacity-100 exit"
+    ---
+    -  class="value-2"
+    +  class="value-2 duration-100 exit-active opacity-100 exit"
+
+Render 2:
+    -  class="value-1 duration-100 exit-active opacity-100 exit"
+    +  class="value-1 duration-100 exit-active opacity-0 exit-to"
+    ---
+    -  class="value-2 duration-100 exit-active opacity-100 exit"
+    +  class="value-2 duration-100 exit-active opacity-0 exit-to"
+
+Render 3: Transition took at least 100ms
+    -    class="value-1 duration-100 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      1
+    -    </span>
+    -  </div>
+    -  <div
+    -    class="value-2 duration-100 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      2
+    -    </span>
+    -  </div>
+    -  <div
+
+Render 4:
+    +  <div
+    +    class="value-5 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      5
+    +    </span>
+    +  </div>
+    +  <div
+    +    class="value-6 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      6
+    +    </span>
+    +  </div>
+
+Render 5:
+    -  class="value-5 duration-75 enter-active opacity-0 enter"
+    +  class="value-5 duration-75 enter-active opacity-100 enter-to"
+    ---
+    -  class="value-6 duration-75 enter-active opacity-0 enter"
+    +  class="value-6 duration-75 enter-active opacity-100 enter-to"
+
+Render 6: Transition took at least 75ms
+    -  class="value-5 duration-75 enter-active opacity-100 enter-to"
+    +  class="value-5"
+    ---
+    -  class="value-6 duration-75 enter-active opacity-100 enter-to"
+    +  class="value-6""
+`;
+
+exports[`TransitionGroup > Shallow Transitions > should transition in added elements 1`] = `
+"Render 1:
+    +  <div
+    +    class="value-5 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      5
+    +    </span>
+    +  </div>
+    +  <div
+    +    class="value-6 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      6
+    +    </span>
+    +  </div>
+
+Render 2:
+    -  class="value-5 duration-75 enter-active opacity-0 enter"
+    +  class="value-5 duration-75 enter-active opacity-100 enter-to"
+    ---
+    -  class="value-6 duration-75 enter-active opacity-0 enter"
+    +  class="value-6 duration-75 enter-active opacity-100 enter-to"
+
+Render 3: Transition took at least 75ms
+    -  class="value-5 duration-75 enter-active opacity-100 enter-to"
+    +  class="value-5"
+    ---
+    -  class="value-6 duration-75 enter-active opacity-100 enter-to"
+    +  class="value-6""
+`;
+
+exports[`TransitionGroup > Shallow Transitions > should transition in added elements and transition out removed elements in parallel 1`] = `
+"Render 1:
+    -    class="value-1"
+    +    class="value-1 duration-75 exit-active opacity-100 exit"
+    ---
+    -    class="value-2"
+    +    class="value-2 duration-75 exit-active opacity-100 exit"
+    ---
+    +    </span>
+    +  </div>
+    +  <div
+    +    class="value-5 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      5
+    +    </span>
+    +  </div>
+    +  <div
+    +    class="value-6 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      6
+
+Render 2:
+    -  class="value-1 duration-75 exit-active opacity-100 exit"
+    +  class="value-1 duration-75 exit-active opacity-0 exit-to"
+    ---
+    -  class="value-2 duration-75 exit-active opacity-100 exit"
+    +  class="value-2 duration-75 exit-active opacity-0 exit-to"
+    ---
+    -  class="value-5 duration-75 enter-active opacity-0 enter"
+    +  class="value-5 duration-75 enter-active opacity-100 enter-to"
+    ---
+    -  class="value-6 duration-75 enter-active opacity-0 enter"
+    +  class="value-6 duration-75 enter-active opacity-100 enter-to"
+
+Render 3: Transition took at least 75ms
+    -    class="value-1 duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      1
+    -    </span>
+    -  </div>
+    -  <div
+    -    class="value-2 duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      2
+    -    </span>
+    -  </div>
+    -  <div
+    ---
+    -    class="value-5 duration-75 enter-active opacity-100 enter-to"
+    +    class="value-5"
+    ---
+    -    class="value-6 duration-75 enter-active opacity-100 enter-to"
+    +    class="value-6""
+`;
+
+exports[`TransitionGroup > Shallow Transitions > should transition out removed elements 1`] = `
+"Render 1:
+    -  class="value-1"
+    +  class="value-1 duration-75 exit-active opacity-100 exit"
+    ---
+    -  class="value-2"
+    +  class="value-2 duration-75 exit-active opacity-100 exit"
+
+Render 2:
+    -  class="value-1 duration-75 exit-active opacity-100 exit"
+    +  class="value-1 duration-75 exit-active opacity-0 exit-to"
+    ---
+    -  class="value-2 duration-75 exit-active opacity-100 exit"
+    +  class="value-2 duration-75 exit-active opacity-0 exit-to"
+
+Render 3: Transition took at least 75ms
+    -    class="value-1 duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      1
+    -    </span>
+    -  </div>
+    -  <div
+    -    class="value-2 duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      2
+    -    </span>
+    -  </div>
+    -  <div"
+`;

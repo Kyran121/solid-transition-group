@@ -192,7 +192,7 @@ describe.concurrent("ComponentTransitionAnalyser", () => {
       expect(activityReport).toMatchSnapshot();
     });
 
-    it("correctly analyses activity for a list of elements which enter and exit", async ({ expect }) => {
+    it("correctly analyses activity for a list of elements added and removed", async ({ expect }) => {
       const duration = 75;
 
       const TransitionComponent = createListTransitionElement({

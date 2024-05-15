@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ComponentTransitionAnalyser > analyseTransitionActivity > correctly analyses activity for a list of elements which enter and exit 1`] = `
+exports[`ComponentTransitionAnalyser > analyseTransitionActivity > correctly analyses activity for a list of elements added and removed 1`] = `
 "Render 1:
     +  <div
     +    class="value-5 duration-75 enter-active opacity-0 enter"

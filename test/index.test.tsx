@@ -6,11 +6,12 @@ import type {
   ToggleTransitionProps,
   TransitionClasses,
   TransitionDurations,
-  TransitionName
+  TransitionName,
+  ListTransitionProps
 } from "./utils/TransitionTypes";
-import { Show, Suspense, createRenderEffect, createResource, untrack } from "solid-js";
+import { Show, For } from "solid-js";
 import { describe, test, it, vi } from "vitest";
-import { Transition } from "../src";
+import { Transition, TransitionGroup } from "../src";
 import { fireEvent, render } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { formatHTML } from "./utils/HTMLFormatter";
@@ -20,6 +21,223 @@ import "./index.css";
 const TRANSITION_CONTAINER_ID = "transition-container";
 
 type EventHandler = (...args: any[]) => void;
+
+const noopEventHandler = () => {};
+
+const createEventHandler =
+  (events: TransitionEvents) =>
+  (type: keyof TransitionEvents) =>
+  (...args: any[]) =>
+    ((events[type] as EventHandler) ?? noopEventHandler)(...args);
+
+describe.concurrent("TransitionGroup", () => {
+  describe("Shallow Transitions", () => {
+    it("should transition in added elements", async ({ expect }) => {
+      const enterDuration = 75;
+
+      const TransitionComponent = createListTransitionElement({
+        enterDuration
+      });
+
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(
+        clickAddButtonWaitingDuration(enterDuration)
+      );
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
+
+    it("should transition out removed elements", async ({ expect }) => {
+      const exitDuration = 75;
+
+      const TransitionComponent = createListTransitionElement({
+        exitDuration
+      });
+
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(
+        clickRemoveButtonWaitingDuration(exitDuration)
+      );
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
+
+    it("should transition in added elements and transition out removed elements in parallel", async ({
+      expect
+    }) => {
+      const duration = 75;
+
+      const TransitionComponent = createListTransitionElement({
+        enterDuration: duration,
+        exitDuration: duration
+      });
+
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(
+        clickAddRemoveButtonWaitingDuration(duration)
+      );
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
+  });
+
+  describe("Events", () => {
+    it("should fire events for all stages", async ({ expect }) => {
+      const eventHandler = vi.fn();
+      const callEventHandler = (type: keyof TransitionEvents) => (e: Element) =>
+        eventHandler(e.textContent, type, Date.now());
+
+      const enterDuration = 75;
+      const exitDuration = 100;
+
+      const TransitionComponent = createListTransitionElement({
+        enterDuration,
+        exitDuration,
+        onBeforeEnter: callEventHandler("onBeforeEnter"),
+        onEnter: callEventHandler("onEnter"),
+        onAfterEnter: callEventHandler("onAfterEnter"),
+        onBeforeExit: callEventHandler("onBeforeExit"),
+        onExit: callEventHandler("onExit"),
+        onAfterExit: callEventHandler("onAfterExit")
+      });
+
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
+      componentTransitionAnalyser.addTransitionTrigger(
+        clickRemoveButtonWaitingDuration(exitDuration)
+      );
+      componentTransitionAnalyser.addTransitionTrigger(
+        clickAddButtonWaitingDuration(enterDuration)
+      );
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+
+      // 3 events per element added or removed
+      // - first trigger removes 2 elements
+      // - second trigger adds 2 elements
+      // - 2*3 + 2*3 = 12
+      expect(eventHandler).toHaveBeenCalledTimes(12);
+
+      const eventHandlerCalls: { [key: string]: [string, number][] } = eventHandler.mock.calls.reduce(
+        (map, [id, event, time]) => ((map[id] || (map[id] = [])).push([event, time]), map),
+        {}
+      );
+
+      const added = ['5', '6'];
+      for (const id of added) {
+        expect(eventHandlerCalls[id]!.map(([name]) => name)).toEqual([
+          "onBeforeEnter",
+          "onEnter",
+          "onAfterEnter",
+        ]);
+
+        const times = eventHandlerCalls[id]!.map(([_, time]) => time);
+
+        const enterHookDiff = times[2]! - times[0]!;
+        expect(enterHookDiff).toBeGreaterThanOrEqual(enterDuration);
+        expect(enterHookDiff).toBeLessThanOrEqual(enterDuration * 3);
+      }
+
+      const removed = ['1', '2'];
+      for (const id of removed) {
+        expect(eventHandlerCalls[id]!.map(([name]) => name)).toEqual([
+          "onBeforeExit",
+          "onExit",
+          "onAfterExit",
+        ]);
+
+        const times = eventHandlerCalls[id]!.map(([_, time]) => time);
+
+        const exitHookDiff = times[2]! - times[0]!;
+        expect(exitHookDiff).toBeGreaterThanOrEqual(exitDuration);
+        expect(exitHookDiff).toBeLessThanOrEqual(exitDuration * 3);
+      }
+    });
+  });
+
+  function clickAddButtonWaitingDuration(expectedDuration: number): TransitionTrigger {
+    const execute = (tools: TransitionComponent) => fireEvent.click(tools.getByTestId("add"));
+    return { execute, expectedDuration };
+  }
+
+  function clickRemoveButtonWaitingDuration(expectedDuration: number): TransitionTrigger {
+    const execute = (tools: TransitionComponent) => fireEvent.click(tools.getByTestId("remove"));
+    return { execute, expectedDuration };
+  }
+
+  function clickAddRemoveButtonWaitingDuration(expectedDuration: number): TransitionTrigger {
+    const execute = (tools: TransitionComponent) =>
+      fireEvent.click(tools.getByTestId("add-remove"));
+    return { execute, expectedDuration };
+  }
+
+  function createListTransitionElement(props: ListTransitionProps): Component {
+    return () => {
+      let index = 4;
+
+      const [list, setList] = createSignal<{ v: string }[]>([
+        { v: "1" },
+        { v: "2" },
+        { v: "3" },
+        { v: "4" }
+      ]);
+      const classProps = createClassProps(props);
+      const handleEvent = createEventHandler(props);
+
+      return (
+        <>
+          <div data-testid="transition-container">
+            <TransitionGroup
+              onBeforeEnter={handleEvent("onBeforeEnter")}
+              onEnter={handleEvent("onEnter")}
+              onAfterEnter={handleEvent("onAfterEnter")}
+              onBeforeExit={handleEvent("onBeforeExit")}
+              onExit={handleEvent("onExit")}
+              onAfterExit={handleEvent("onAfterExit")}
+              name={props.name}
+              {...classProps}
+            >
+              <For each={list()}>
+                {({ v }) => (
+                  <div class={`value-${v}`}>
+                    <span>{v}</span>
+                  </div>
+                )}
+              </For>
+            </TransitionGroup>
+          </div>
+          <button
+            data-testid="remove"
+            onClick={() => {
+              setList(p => p.slice(2));
+            }}
+          >
+            Remove
+          </button>
+          <button
+            data-testid="add"
+            onClick={() => {
+              setList(p => [...p, { v: `${++index}` }, { v: `${++index}` }]);
+            }}
+          >
+            Add
+          </button>
+          <button
+            data-testid="add-remove"
+            onClick={() => {
+              setList(p => [...p.slice(2), { v: `${++index}` }, { v: `${++index}` }]);
+            }}
+          >
+            Add & Remove
+          </button>
+        </>
+      );
+    };
+  }
+});
 
 describe.concurrent("Transition", () => {
   describe("Setup", () => {
@@ -162,7 +380,9 @@ describe.concurrent("Transition", () => {
     });
 
     describe("Switch", () => {
-      it("should transition out old element followed by transitioning new element in (out-in)", async ({ expect }) => {
+      it("should transition out old element followed by transitioning new element in (out-in)", async ({
+        expect
+      }) => {
         const enterDuration = 75;
         const exitDuration = 100;
         const mode = "outin";
@@ -183,7 +403,9 @@ describe.concurrent("Transition", () => {
         expect(activityReport).toMatchSnapshot();
       });
 
-      it("should transition in new element followed by transitioning old element out (in-out)", async ({ expect }) => {
+      it("should transition in new element followed by transitioning old element out (in-out)", async ({
+        expect
+      }) => {
         const enterDuration = 75;
         const exitDuration = 100;
         const mode = "inout";
@@ -214,7 +436,9 @@ describe.concurrent("Transition", () => {
           });
 
           const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
-          componentTransitionAnalyser.addTransitionTrigger(clickNextButtonWaitingDuration(duration));
+          componentTransitionAnalyser.addTransitionTrigger(
+            clickNextButtonWaitingDuration(duration)
+          );
 
           const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
           expect(activityReport).toMatchSnapshot();
@@ -222,14 +446,16 @@ describe.concurrent("Transition", () => {
         test("case 2: durations are different", async ({ expect }) => {
           const enterDuration = 75;
           const exitDuration = 100;
-       
+
           const TransitionComponent = createSwitchTransitionComponent({
             enterDuration,
             exitDuration
           });
 
           const componentTransitionAnalyser = new ComponentTransitionAnalyser(TransitionComponent);
-          componentTransitionAnalyser.addTransitionTrigger(clickNextButtonWaitingDuration(Math.max(enterDuration, exitDuration)));
+          componentTransitionAnalyser.addTransitionTrigger(
+            clickNextButtonWaitingDuration(Math.max(enterDuration, exitDuration))
+          );
 
           const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
           expect(activityReport).toMatchSnapshot();
@@ -291,14 +517,6 @@ describe.concurrent("Transition", () => {
     });
   });
 
-  const noopEventHandler = () => {};
-
-  const createEventHandler =
-    (events: TransitionEvents) =>
-    (type: keyof TransitionEvents) =>
-    (...args: any[]) =>
-      ((events[type] as EventHandler) ?? noopEventHandler)(...args);
-
   function createTransitionComponent(props: ToggleTransitionProps): Component {
     return () => {
       const [show, setShow] = createSignal(props.show);
@@ -356,20 +574,6 @@ describe.concurrent("Transition", () => {
     };
   }
 
-  function createClassProps(props: TransitionName & TransitionDurations): TransitionClasses {
-    if (props.name) {
-      return {};
-    }
-    return {
-      enterActiveClass: `duration-${props.enterDuration} enter-active`,
-      enterClass: "opacity-0 enter",
-      enterToClass: "opacity-100 enter-to",
-      exitActiveClass: `duration-${props.exitDuration} exit-active`,
-      exitClass: "opacity-100 exit",
-      exitToClass: "opacity-0 exit-to"
-    };
-  }
-
   function clickToggleButtonWaitingDuration(expectedDuration: number): TransitionTrigger {
     const execute = (tools: TransitionComponent) => fireEvent.click(tools.getByTestId("toggle"));
     return { execute, expectedDuration };
@@ -380,3 +584,17 @@ describe.concurrent("Transition", () => {
     return { execute, expectedDuration };
   }
 });
+
+function createClassProps(props: TransitionName & TransitionDurations): TransitionClasses {
+  if (props.name) {
+    return {};
+  }
+  return {
+    enterActiveClass: `duration-${props.enterDuration} enter-active`,
+    enterClass: "opacity-0 enter",
+    enterToClass: "opacity-100 enter-to",
+    exitActiveClass: `duration-${props.exitDuration} exit-active`,
+    exitClass: "opacity-100 exit",
+    exitToClass: "opacity-0 exit-to"
+  };
+}
