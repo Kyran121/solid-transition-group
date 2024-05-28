@@ -10,6 +10,6 @@ describe("Transition", () => {
       </Transition>
     ));
 
-    expect(html).toBe("<div>hello</div>");
+    expect(html).toBe('<div data-hk="0-0">hello</div>');
   });
 });

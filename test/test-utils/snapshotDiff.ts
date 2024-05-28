@@ -2,7 +2,7 @@ import { diff } from "@vitest/utils/diff";
 import { DiffOptions } from "vitest";
 
 // copied from @vitest/utils/diff internals since it was not exposed
-const noColor = (string: string): string => string
+const noColor = (string: string): string => string;
 
 const DIFF_OPTIONS: DiffOptions = {
   aAnnotation: "__REMOVE_ME__",

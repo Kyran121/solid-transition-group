@@ -1,0 +1,383 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Transition > switch scenarios > correctly analyses activity for a new element entering and old element exiting at the same time (same duration) 1`] = `
+"Render 1:
+    -  <div>
+    +  <div
+    +    class="duration-75 enter-active opacity-0 enter"
+    +  >
+    +    2
+    +  </div>
+    +  <div
+    +    class="duration-75 exit-active opacity-100 exit"
+    +  >
+
+Render 2:
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
+    ---
+    -  class="duration-75 exit-active opacity-100 exit"
+    +  class="duration-75 exit-active opacity-0 exit-to"
+
+Render 3: Transition took at least 75ms
+    -    class="duration-75 enter-active opacity-100 enter-to"
+    +    class
+    ---
+    -  </div>
+    -  <div
+    -    class="duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    1"
+`;
+
+exports[`Transition > switch scenarios > correctly analyses activity for a new element entering followed by an old element exiting (in-out) 1`] = `
+"Render 1:
+    +  <div
+    +    class="duration-75 enter-active opacity-0 enter"
+    +  >
+    +    2
+    +  </div>
+
+Render 2:
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
+
+Render 3: Transition took at least 75ms
+    -    class="duration-75 enter-active opacity-100 enter-to"
+    +    class
+    ---
+    -  <div>
+    +  <div
+    +    class="duration-100 exit-active opacity-100 exit"
+    +  >
+
+Render 4:
+    -  class="duration-100 exit-active opacity-100 exit"
+    +  class="duration-100 exit-active opacity-0 exit-to"
+
+Render 5:
+    -  <div
+    -    class="duration-100 exit-active opacity-0 exit-to"
+    -  >
+    -    1
+    -  </div>"
+`;
+
+exports[`Transition > switch scenarios > correctly analyses activity for an old element exiting followed by a new element entering (out-in) 1`] = `
+"Render 1:
+    -  <div>
+    +  <div
+    +    class="duration-100 exit-active opacity-100 exit"
+    +  >
+
+Render 2:
+    -  class="duration-100 exit-active opacity-100 exit"
+    +  class="duration-100 exit-active opacity-0 exit-to"
+
+Render 3: Transition took at least 100ms
+    -  class="duration-100 exit-active opacity-0 exit-to"
+    +  class="duration-75 enter-active opacity-0 enter"
+    ---
+    -  1
+    +  2
+
+Render 4:
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
+
+Render 5: Transition took at least 75ms
+    -  class="duration-75 enter-active opacity-100 enter-to"
+    +  class"
+`;
+
+exports[`Transition > toggle scenarios > correctly analyses activity for an element which enters 1`] = `
+"Render 1:
+    +  <div
+    +    class="duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      Hello!
+    +    </span>
+    +  </div>
+
+Render 2:
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
+
+Render 3: Transition took at least 75ms
+    -  class="duration-75 enter-active opacity-100 enter-to"
+    +  class"
+`;
+
+exports[`Transition > toggle scenarios > correctly analyses activity for an element which exits 1`] = `
+"Render 1:
+    -  <div>
+    +  <div
+    +    class="duration-75 exit-active opacity-100 exit"
+    +  >
+
+Render 2:
+    -  class="duration-75 exit-active opacity-100 exit"
+    +  class="duration-75 exit-active opacity-0 exit-to"
+
+Render 3: Transition took at least 75ms
+    -  <div
+    -    class="duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      Hello!
+    -    </span>
+    -  </div>"
+`;
+
+exports[`Transition > toggle scenarios > correctly analyses activity for element which enters and exits 1`] = `
+"Render 1:
+    +  <div
+    +    class="duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      Hello!
+    +    </span>
+    +  </div>
+
+Render 2:
+    -  class="duration-75 enter-active opacity-0 enter"
+    +  class="duration-75 enter-active opacity-100 enter-to"
+
+Render 3: Transition took at least 75ms
+    -  class="duration-75 enter-active opacity-100 enter-to"
+    +  class
+
+Render 4:
+    -  class
+    +  class="duration-100 exit-active opacity-100 exit"
+
+Render 5:
+    -  class="duration-100 exit-active opacity-100 exit"
+    +  class="duration-100 exit-active opacity-0 exit-to"
+
+Render 6: Transition took at least 100ms
+    -  <div
+    -    class="duration-100 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      Hello!
+    -    </span>
+    -  </div>"
+`;
+
+exports[`TransitionGroup > correctly analyses activity for a list of elements added and removed 1`] = `
+"Render 1:
+    +  <div
+    +    class="value-5 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      5
+    +    </span>
+    +  </div>
+    +  <div
+    +    class="value-6 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <span>
+    +      6
+    +    </span>
+    +  </div>
+
+Render 2:
+    -  class="value-5 duration-75 enter-active opacity-0 enter"
+    +  class="value-5 duration-75 enter-active opacity-100 enter-to"
+    ---
+    -  class="value-6 duration-75 enter-active opacity-0 enter"
+    +  class="value-6 duration-75 enter-active opacity-100 enter-to"
+
+Render 3: Transition took at least 75ms
+    -  class="value-5 duration-75 enter-active opacity-100 enter-to"
+    +  class="value-5"
+    ---
+    -  class="value-6 duration-75 enter-active opacity-100 enter-to"
+    +  class="value-6"
+
+Render 4:
+    -  class="value-1"
+    +  class="value-1 duration-75 exit-active opacity-100 exit"
+    ---
+    -  class="value-2"
+    +  class="value-2 duration-75 exit-active opacity-100 exit"
+
+Render 5:
+    -  class="value-1 duration-75 exit-active opacity-100 exit"
+    +  class="value-1 duration-75 exit-active opacity-0 exit-to"
+    ---
+    -  class="value-2 duration-75 exit-active opacity-100 exit"
+    +  class="value-2 duration-75 exit-active opacity-0 exit-to"
+
+Render 6: Transition took at least 75ms
+    -    class="value-1 duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      1
+    -    </span>
+    -  </div>
+    -  <div
+    -    class="value-2 duration-75 exit-active opacity-0 exit-to"
+    -  >
+    -    <span>
+    -      2
+    -    </span>
+    -  </div>
+    -  <div
+    -    class="value-3"
+    +    class="value-3 duration-150 move-active"
+    +    style
+    ---
+    -    class="value-4"
+    +    class="value-4 duration-150 move-active"
+    +    style
+    ---
+    -    class="value-5"
+    +    class="value-5 duration-150 move-active"
+    +    style
+    ---
+    -    class="value-6"
+    +    class="value-6 duration-150 move-active"
+    +    style
+
+Render 7: Transition took at least 150ms
+    -  class="value-3 duration-150 move-active"
+    +  class="value-3"
+    ---
+    -  class="value-4 duration-150 move-active"
+    +  class="value-4"
+    ---
+    -  class="value-5 duration-150 move-active"
+    +  class="value-5"
+    ---
+    -  class="value-6 duration-150 move-active"
+    +  class="value-6""
+`;
+
+exports[`TransitionGroup > correctly analyses activity for a list of svgs added and removed 1`] = `
+"Render 1:
+    +  <svg
+    +    width="100"
+    +    height="100"
+    +    xmlns="http://www.w3.org/2000/svg"
+    +    class="value-5 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <circle
+    +      cx="50"
+    +      cy="50"
+    +      r="40"
+    +      stroke="black"
+    +      stroke-width="3"
+    +      fill="red"
+    +    >
+    +    </circle>
+    +  </svg>
+    +  <svg
+    +    width="100"
+    +    height="100"
+    +    xmlns="http://www.w3.org/2000/svg"
+    +    class="value-6 duration-75 enter-active opacity-0 enter"
+    +  >
+    +    <circle
+    +      cx="50"
+    +      cy="50"
+    +      r="40"
+    +      stroke="black"
+    +      stroke-width="3"
+    +      fill="red"
+    +    >
+    +    </circle>
+    +  </svg>
+
+Render 2:
+    -  class="value-5 duration-75 enter-active opacity-0 enter"
+    +  class="value-5 duration-75 enter-active opacity-100 enter-to"
+    ---
+    -  class="value-6 duration-75 enter-active opacity-0 enter"
+    +  class="value-6 duration-75 enter-active opacity-100 enter-to"
+
+Render 3: Transition took at least 75ms
+    -  class="value-5 duration-75 enter-active opacity-100 enter-to"
+    +  class="value-5"
+    ---
+    -  class="value-6 duration-75 enter-active opacity-100 enter-to"
+    +  class="value-6"
+
+Render 4:
+    -  class="value-1"
+    +  class="value-1 duration-75 exit-active opacity-100 exit"
+    ---
+    -  class="value-2"
+    +  class="value-2 duration-75 exit-active opacity-100 exit"
+
+Render 5:
+    -  class="value-1 duration-75 exit-active opacity-100 exit"
+    +  class="value-1 duration-75 exit-active opacity-0 exit-to"
+    ---
+    -  class="value-2 duration-75 exit-active opacity-100 exit"
+    +  class="value-2 duration-75 exit-active opacity-0 exit-to"
+
+Render 6: Transition took at least 75ms
+    -    class="value-1 duration-75 exit-active opacity-0 exit-to"
+    +    class="value-3 duration-150 move-active"
+    +    style
+    ---
+    -    class="value-2 duration-75 exit-active opacity-0 exit-to"
+    +    class="value-4 duration-150 move-active"
+    +    style
+    ---
+    -    class="value-3"
+    +    class="value-5 duration-150 move-active"
+    +    style
+    ---
+    -    class="value-4"
+    -  >
+    -    <circle
+    -      cx="50"
+    -      cy="50"
+    -      r="40"
+    -      stroke="black"
+    -      stroke-width="3"
+    -      fill="red"
+    -    >
+    -    </circle>
+    -  </svg>
+    -  <svg
+    -    width="100"
+    -    height="100"
+    -    xmlns="http://www.w3.org/2000/svg"
+    -    class="value-5"
+    -  >
+    -    <circle
+    -      cx="50"
+    -      cy="50"
+    -      r="40"
+    -      stroke="black"
+    -      stroke-width="3"
+    -      fill="red"
+    -    >
+    -    </circle>
+    -  </svg>
+    -  <svg
+    -    width="100"
+    -    height="100"
+    -    xmlns="http://www.w3.org/2000/svg"
+    -    class="value-6"
+    +    class="value-6 duration-150 move-active"
+    +    style
+
+Render 7: Transition took at least 150ms
+    -  class="value-3 duration-150 move-active"
+    +  class="value-3"
+    ---
+    -  class="value-4 duration-150 move-active"
+    +  class="value-4"
+    ---
+    -  class="value-5 duration-150 move-active"
+    +  class="value-5"
+    ---
+    -  class="value-6 duration-150 move-active"
+    +  class="value-6""
+`;

@@ -1,8 +1,8 @@
-import { Component } from "solid-js";
+import type { TransitionProps } from "../../src";
 import { render } from "@solidjs/testing-library";
 import { trackDOMContentChanges } from "./DOMContentTracker";
 import { formatHTML } from "./HTMLFormatter";
-import { type TransitionProps, Transition } from "../../src";
+import { Transition, TransitionGroup } from "../../src";
 import TaskManager from "./TaskManager";
 import { snapshotDiff } from "./snapshotDiff";
 
@@ -17,7 +17,7 @@ export type TransitionTrigger = {
 };
 export type TransitionSnapshot = {
   content: string;
-  recordedAt: bigint;
+  recordedAt: number;
 };
 
 /**
@@ -30,8 +30,8 @@ export default class ComponentTransitionAnalyser {
   private transitonTriggers: TransitionTrigger[] = [];
   private capturedSnapshots: TransitionSnapshot[] = [];
 
-  public constructor(transitionComponent: Component) {
-    this.transitionComponent = render(transitionComponent as any);
+  public constructor(transitionComponent: TransitionComponent) {
+    this.transitionComponent = transitionComponent;
     this.transitionContainer = this.getTransitionContainer(this.transitionComponent);
   }
 
@@ -39,12 +39,14 @@ export default class ComponentTransitionAnalyser {
     return transitionComponent.getByTestId(TRANSITION_CONTAINER_ID);
   }
 
-  public addTransitionTrigger(transitionTrigger: TransitionTrigger) {
+  public addTransitionTrigger(transitionTrigger: TransitionTrigger): ComponentTransitionAnalyser {
     this.transitonTriggers.push(transitionTrigger);
+    return this;
   }
 
-  public expectFollowUpTransition(expectedDuration: number) {
+  public expectFollowUpTransition(expectedDuration: number): ComponentTransitionAnalyser {
     this.transitonTriggers.push({ execute: () => {}, expectedDuration });
+    return this;
   }
 
   public async analyseTransitionActivity() {
@@ -63,7 +65,7 @@ export default class ComponentTransitionAnalyser {
       () => this.transitionContainer.innerHTML,
       newContent => {
         const content = formatHTML(newContent);
-        const recordedAt = process.hrtime.bigint();
+        const recordedAt = Date.now();
         this.capturedSnapshots.push({ content, recordedAt });
       }
     );
@@ -80,49 +82,34 @@ export default class ComponentTransitionAnalyser {
   private async waitDurationForTransitionToComplete() {
     /** wait for transition stages to complete (detailed in {@link getTransitionActivityReport}) */
     await this.waitForNextFrame();
-    await this.waitForDuration(this.extractHighestDurationFromTransitioningElements());
-
-    this.dispatchAnimationEndEvent(); // See https://github.com/jsdom/jsdom/issues/3239
-    await this.waitForNextFrame(); // Wait additional frame to ensure completion
-  }
-
-  private extractHighestDurationFromTransitioningElements(): number {
-    const transitionDurations = Array.from(this.getTransitioningElements()).map(
-      this.getTransitionDuration
-    );
-    let transitionDuration = transitionDurations[0]!;
-    for (let i = 1; i < transitionDurations.length; i++) {
-      transitionDuration = Math.max(transitionDurations[i]!, transitionDuration);
-    }
-    return transitionDuration;
-  }
-
-  private getTransitioningElements(): HTMLDivElement[] {
-    const transitioning = Array.from(this.transitionContainer.querySelectorAll("div")).filter(
-      this.getTransitionDuration
-    );
-    if (transitioning.length === 0) {
-      throw new Error("Unable to find any transitioning elements at parent level");
-    }
-    return transitioning;
-  }
-
-  private getTransitionDuration(element: HTMLDivElement): number {
-    return parseInt(window.getComputedStyle(element).transitionDuration);
+    await Promise.all(this.getTransitioningElements().map(this.waitForTransitionEndEvent));
+    await this.waitForNextFrame();
   }
 
   private async waitForNextFrame() {
     await new Promise(resolve => TaskManager.scheduleAnimationFrameAfterNext(resolve));
   }
 
-  private async waitForDuration(duration: number) {
-    await new Promise(resolve => TaskManager.scheduleTimeout(resolve, duration));
+  private getTransitioningElements(): HTMLElement[] {
+    const transitioning = Array.from(
+      this.transitionContainer.querySelectorAll('*[class*="duration"]')
+    ).filter(el => parseFloat(getComputedStyle(el).transitionDuration));
+    if (transitioning.length === 0) {
+      throw new Error("Unable to find any transitioning elements at parent level");
+    }
+    return transitioning as HTMLElement[];
   }
 
-  private dispatchAnimationEndEvent() {
-    this.getTransitioningElements().forEach(transitioningElement =>
-      transitioningElement.dispatchEvent(new Event("animationend"))
-    );
+  private waitForTransitionEndEvent(element: HTMLElement): Promise<void> {
+    return new Promise(resolve => {
+      const handler = (event: TransitionEvent) => {
+        if (event.target === element) {
+          element.removeEventListener("transitionend", handler);
+          resolve();
+        }
+      };
+      element.addEventListener("transitionend", handler);
+    });
   }
 
   /**
@@ -156,52 +143,89 @@ export default class ComponentTransitionAnalyser {
    * To calculate the actual time taken, we need to find out how long it takes to get these
    * 3 snapshots. Since we log a recordedAt time for each snapshot, we do this by calculating
    * the difference between first recordedAt and last recordedAt value (in milliseconds).
+   *
+   * Note: for move transitions emitted by {@link TransitionGroup} there are two stages:
+   *  - Apply move class (no wait time)
+   *  - Remove move class (after duration)
+   * This is handled as an edge case.
    */
   private getTransitionActivityReport() {
     let formattedReport = "";
-    let stage = 1,
-      transiton = 1;
+    let transitionStage = 1;
+    let transitionIndex = 1;
+    let transitionStartIndex = 1;
+    const expectedDurations: number[] = this.transitonTriggers.map(
+      trigger => trigger.expectedDuration
+    );
+    for (let i = 1; i < this.capturedSnapshots.length; i++) {
+      formattedReport += `Render ${i}:`;
+      if (transitionStage % TRANSITION_STAGES === 0) {
+        transitionStage = this.snapshotInEnterTransition(i)
+          ? 1
+          : this.snapshotInMoveTransition(i)
+            ? 2
+            : 0;
 
-    const durations: number[] = this.transitonTriggers.map(trigger => trigger.expectedDuration);
-    for (let change = 1; change < this.capturedSnapshots.length; change++) {
-      formattedReport += `Render ${change}:`;
-
-      if (stage % TRANSITION_STAGES === 0) {
-        stage = Number(this.snapshotAtChangeInEnterTransition(change));
-        const duration = durations.shift();
-        this.assertNthTransitionChangeTookDuration(transiton++, change, duration!);
-        formattedReport += ` Transition took at least ${duration}ms`;
+        const expectedDuration = expectedDurations.shift();
+        const transtionEndIndex = i;
+        this.assertTransitionTookDuration(
+          transitionIndex++,
+          transtionEndIndex,
+          transitionStartIndex,
+          expectedDuration!
+        );
+        formattedReport += ` Transition took at least ${expectedDuration}ms`;
+        transitionStartIndex = i;
       }
-
-      formattedReport += `\n${this.diffBetweenSnapshotsAtChanges(change, change - 1)}\n\n`;
-      stage++;
+      formattedReport += `\n${this.diffBetweenSnapshots(i, i - 1)}\n\n`;
+      transitionStage++;
     }
     return formattedReport.trim();
   }
 
-  private snapshotAtChangeInEnterTransition(change: number) {
+  private snapshotInEnterTransition(change: number) {
     return this.capturedSnapshots[change]!.content.indexOf("enter-active") !== -1;
   }
 
-  private assertNthTransitionChangeTookDuration(n: number, change: number, duration: number) {
-    if (!this.transitionChangeTookDuration(change, duration)) {
-      throw new Error(`Transition #${n} failed to take at least ${duration}ms`);
+  private snapshotInMoveTransition(change: number) {
+    return this.capturedSnapshots[change]!.content.indexOf("move-active") !== -1;
+  }
+
+  private assertTransitionTookDuration(
+    transitionIndex: number,
+    transitionEndIndex: number,
+    transitionStartIndex: number,
+    expectedDuration: number
+  ) {
+    if (!this.transitionTookDuration(transitionEndIndex, transitionStartIndex, expectedDuration)) {
+      throw new Error(
+        `Transition #${transitionIndex} failed to take at least ${expectedDuration}ms`
+      );
     }
   }
 
-  private transitionChangeTookDuration(change: number, duration: number) {
-    const frameWaitTime = this.timeElapsedInMsBetweenSnapshotsAtChanges(change - 1, change - 2);
-    const actualDuration = this.timeElapsedInMsBetweenSnapshotsAtChanges(change, change - 2);
-    return actualDuration >= duration && actualDuration <= duration + frameWaitTime * 2;
+  private transitionTookDuration(
+    transtionEndIndex: number,
+    transitionStartIndex: number,
+    expectedDuration: number
+  ) {
+    const fpsBuffer = 20;
+    const min = expectedDuration - fpsBuffer;
+    const max = expectedDuration * 2 + fpsBuffer;
+    const actualDuration = this.diffBetweenSnapshotRecordedAtTimesInMs(
+      transtionEndIndex,
+      transitionStartIndex
+    );
+    return actualDuration >= min && actualDuration <= max;
   }
 
-  private timeElapsedInMsBetweenSnapshotsAtChanges(current: number, previous: number): number {
+  private diffBetweenSnapshotRecordedAtTimesInMs(current: number, previous: number): number {
     const recordedAt = this.capturedSnapshots[current]!.recordedAt;
     const prevRecordedAt = this.capturedSnapshots[previous]!.recordedAt;
-    return Number((recordedAt - prevRecordedAt) / BigInt(1e6));
+    return recordedAt - prevRecordedAt;
   }
 
-  private diffBetweenSnapshotsAtChanges(current: number, previous: number): string {
+  private diffBetweenSnapshots(current: number, previous: number): string {
     return snapshotDiff(
       this.capturedSnapshots[previous]!.content,
       this.capturedSnapshots[current]!.content

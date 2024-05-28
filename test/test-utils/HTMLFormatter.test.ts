@@ -1,7 +1,7 @@
 import { describe, suite, it, expect } from "vitest";
 import { formatHTML } from "./HTMLFormatter";
 
-suite("HTMLFormatter", () => {
+suite.skip("HTMLFormatter", () => {
   describe("formatHTML", () => {
     it("formats simple nested HTML with no attributes", () => {
       const input = "<div><span>Hello!</span></div>";

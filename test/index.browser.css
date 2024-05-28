@@ -4,6 +4,9 @@
 .duration-100 {
   transition-duration: 100ms;
 }
+.duration-150 {
+  transition-duration: 150ms;
+}
 .opacity-0 {
   opacity: 0;
 }
