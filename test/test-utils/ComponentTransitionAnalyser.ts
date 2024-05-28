@@ -92,7 +92,9 @@ export default class ComponentTransitionAnalyser {
 
   private getTransitioningElements(): HTMLElement[] {
     const transitioning = Array.from(
-      this.transitionContainer.querySelectorAll('*[class*="duration"]')
+      this.transitionContainer.querySelectorAll(
+        '*[class*="duration"],.item-enter-active,.item-exit-active'
+      )
     ).filter(el => parseFloat(getComputedStyle(el).transitionDuration));
     if (transitioning.length === 0) {
       throw new Error("Unable to find any transitioning elements at parent level");

@@ -1,4 +1,3 @@
-import { ssr } from "solid-js/web";
 import solid from "vite-plugin-solid";
 import { defineWorkspace } from "vitest/config";
 
@@ -13,7 +12,7 @@ export default defineWorkspace([
       globals: true,
       browser: {
         enabled: true,
-        headless: true,
+        headless: false,
         name: "chromium",
         provider: "playwright"
       }

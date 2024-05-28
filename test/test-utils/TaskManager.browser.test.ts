@@ -3,7 +3,7 @@ import TaskManager from "./TaskManager";
 
 const FRAME_WAITING_TIME = 16;
 
-suite.concurrent.skip("TaskManager", () => {
+suite.concurrent("TaskManager", () => {
   let errors: string[] = [];
 
   beforeEach(() => {

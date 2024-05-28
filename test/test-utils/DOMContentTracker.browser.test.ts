@@ -1,7 +1,7 @@
 import { describe, it, expect, suite, afterEach, vi } from "vitest";
 import { trackDOMContentChanges } from "./DOMContentTracker";
 
-suite.skip("DOMContentTracker", () => {
+suite("DOMContentTracker", () => {
   describe.concurrent("trackDOMContentChanges", () => {
     it("calls onContentChange with initial content on first call", async ({ expect }) => {
       const getContent = vi.fn(() => "initial");

@@ -55,6 +55,34 @@ describe("Transition", () => {
       const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
       expect(activityReport).toMatchSnapshot();
     });
+
+    it("correctly analyses activity for an element which enters (generated classes)", async ({
+      expect
+    }) => {
+      const enterDuration = 75;
+      const transitioningComponent = render(() => (
+        <ToggleItemTransition show={false} name="item" />
+      ));
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(
+        transitioningComponent
+      ).addTransitionTrigger(clickButtonWithTestIdWaitingDuration("toggle", enterDuration));
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
+
+    it("correctly analyses activity for an element which exits (generated classes)", async ({
+      expect
+    }) => {
+      const exitDuration = 100;
+      const transitioningComponent = render(() => <ToggleItemTransition show={true} name="item" />);
+      const componentTransitionAnalyser = new ComponentTransitionAnalyser(
+        transitioningComponent
+      ).addTransitionTrigger(clickButtonWithTestIdWaitingDuration("toggle", exitDuration));
+
+      const activityReport = await componentTransitionAnalyser.analyseTransitionActivity();
+      expect(activityReport).toMatchSnapshot();
+    });
   });
 
   describe("switch scenarios", () => {

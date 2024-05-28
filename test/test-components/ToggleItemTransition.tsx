@@ -13,17 +13,24 @@ export type ToggleItemProps = {
 export const ToggleItemTransition: VoidComponent<ToggleItemProps> = props => {
   const [show, setShow] = createSignal(props.show);
 
+  let transitionProps = {};
+  if (props.name) {
+    transitionProps = { name: props.name };
+  } else {
+    transitionProps = {
+      enterActiveClass: `duration-${props.enterDuration} enter-active`,
+      enterClass: "opacity-0 enter",
+      enterToClass: "opacity-100 enter-to",
+      exitActiveClass: `duration-${props.exitDuration} exit-active`,
+      exitClass: "opacity-100 exit",
+      exitToClass: "opacity-0 exit-to"
+    };
+  }
+
   return (
     <>
       <div data-testid="transition-container">
-        <Transition
-          enterActiveClass={`duration-${props.enterDuration} enter-active`}
-          enterClass="opacity-0 enter"
-          enterToClass="opacity-100 enter-to"
-          exitActiveClass={`duration-${props.exitDuration} exit-active`}
-          exitClass="opacity-100 exit"
-          exitToClass="opacity-0 exit-to"
-        >
+        <Transition {...transitionProps}>
           <Show when={show()}>
             <div>
               <span>Hello!</span>

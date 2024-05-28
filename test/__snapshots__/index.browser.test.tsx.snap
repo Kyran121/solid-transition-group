@@ -90,6 +90,25 @@ Render 5: Transition took at least 75ms
     +  class"
 `;
 
+exports[`Transition > toggle scenarios > correctly analyses activity for an element which enters (generated classes) 1`] = `
+"Render 1:
+    +  <div
+    +    class="item-enter-active item-enter"
+    +  >
+    +    <span>
+    +      Hello!
+    +    </span>
+    +  </div>
+
+Render 2:
+    -  class="item-enter-active item-enter"
+    +  class="item-enter-active item-enter-to"
+
+Render 3: Transition took at least 75ms
+    -  class="item-enter-active item-enter-to"
+    +  class"
+`;
+
 exports[`Transition > toggle scenarios > correctly analyses activity for an element which enters 1`] = `
 "Render 1:
     +  <div
@@ -107,6 +126,27 @@ Render 2:
 Render 3: Transition took at least 75ms
     -  class="duration-75 enter-active opacity-100 enter-to"
     +  class"
+`;
+
+exports[`Transition > toggle scenarios > correctly analyses activity for an element which exits (generated classes) 1`] = `
+"Render 1:
+    -  <div>
+    +  <div
+    +    class="item-exit-active item-exit"
+    +  >
+
+Render 2:
+    -  class="item-exit-active item-exit"
+    +  class="item-exit-active item-exit-to"
+
+Render 3: Transition took at least 100ms
+    -  <div
+    -    class="item-exit-active item-exit-to"
+    -  >
+    -    <span>
+    -      Hello!
+    -    </span>
+    -  </div>"
 `;
 
 exports[`Transition > toggle scenarios > correctly analyses activity for an element which exits 1`] = `
